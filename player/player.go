@@ -65,7 +65,7 @@ func NewUser() (*Player, error) {
 	return &player, nil
 }
 
-func (p *Player) InvertShape() *Player {
+func (p Player) InvertShape() Player {
 	p.Shape *= -1
 	return p
 }

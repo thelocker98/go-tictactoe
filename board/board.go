@@ -2,6 +2,7 @@ package board
 
 import (
 	"fmt"
+	"math/rand"
 )
 
 type Board struct {
@@ -66,6 +67,17 @@ func (b *Board) CheckWin() (bool, int) {
 	}
 
 	return true, 0 // Tie
+}
+
+func RandomizeBoardIndex() [9]int64 {
+	numbers := [9]int64{0, 1, 2, 3, 4, 5, 6, 7, 8}
+
+	// Shuffle the slice using Fisher-Yates algorithm
+	rand.Shuffle(len(numbers), func(i, j int) {
+		numbers[i], numbers[j] = numbers[j], numbers[i]
+	})
+
+	return numbers
 }
 
 /*

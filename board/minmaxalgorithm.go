@@ -19,14 +19,13 @@ func score(b *Board, p *player.Player) (bool, int64) {
 }
 
 func FindBestMove(b *Board, p player.Player) int64 {
-	var maxScore int64 = -2
+	var maxScore int64 = -20
 	var loc int64 = -1
 
-	var i int64
-	for i = 0; i < 9; i++ {
+	for _, i := range RandomizeBoardIndex() {
 		if b.Board[i] == 0 {
 			b.Board[i] = p.Shape
-			thisScore := -b.minmax(*p.InvertShape())
+			thisScore := -b.minmax(p.InvertShape())
 			//_, thisScore := score(b, &p)
 
 			if thisScore > maxScore {
@@ -41,21 +40,23 @@ func FindBestMove(b *Board, p player.Player) int64 {
 	return loc
 }
 
-func (b *Board) minmax(p player.Player) int64 {
-	win, score := score(b, &p)
+func (b Board) minmax(p player.Player) int64 {
+	win, scoreVal := score(&b, &p)
 	if win {
-		return score
+		return scoreVal
 	}
 
-	score = -2
-	loc := -1
+	var maxScore int64 = -20
+	var loc int64 = -1
 
-	for i := 0; i < 9; i++ {
+	for _, i := range RandomizeBoardIndex() {
 		if b.Board[i] == 0 {
 			b.Board[i] = p.Shape
-			thisScore := -1 * b.minmax(*p.InvertShape())
-			if thisScore > score {
-				score = thisScore
+			thisScore := -b.minmax(p.InvertShape())
+			//_, thisScore := score(&b, &p)
+
+			if thisScore > maxScore {
+				maxScore = thisScore
 				loc = i
 			}
 
@@ -66,6 +67,6 @@ func (b *Board) minmax(p player.Player) int64 {
 	if loc == -1 {
 		return 0
 	} else {
-		return score
+		return maxScore
 	}
 }
