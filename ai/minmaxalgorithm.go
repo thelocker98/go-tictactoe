@@ -1,12 +1,13 @@
-package board
+package ai
 
 import (
 	"fmt"
 
+	"example.com/tictactoe/board"
 	"example.com/tictactoe/player"
 )
 
-func score(b *Board, p *player.Player) (bool, int64) {
+func score(b *board.Board, p *player.Player) (bool, int64) {
 	win, winner := b.CheckWin()
 	if win && winner != 0 {
 		if winner == p.Shape {
@@ -18,15 +19,14 @@ func score(b *Board, p *player.Player) (bool, int64) {
 	return win, 0
 }
 
-func FindBestMove(b *Board, p player.Player) int64 {
+func FindBestMove(b *board.Board, p player.Player) int64 {
 	var maxScore int64 = -20
 	var loc int64 = -1
 
-	for _, i := range RandomizeBoardIndex() {
+	for _, i := range board.RandomizeBoardIndex() {
 		if b.Board[i] == 0 {
 			b.Board[i] = p.Shape
-			thisScore := -b.minmax(p.InvertShape())
-			//_, thisScore := score(b, &p)
+			thisScore := -minmax(*b, p.InvertShape())
 
 			if thisScore > maxScore {
 				maxScore = thisScore
@@ -40,7 +40,7 @@ func FindBestMove(b *Board, p player.Player) int64 {
 	return loc
 }
 
-func (b Board) minmax(p player.Player) int64 {
+func minmax(b board.Board, p player.Player) int64 {
 	win, scoreVal := score(&b, &p)
 	if win {
 		return scoreVal
@@ -49,12 +49,10 @@ func (b Board) minmax(p player.Player) int64 {
 	var maxScore int64 = -20
 	var loc int64 = -1
 
-	for _, i := range RandomizeBoardIndex() {
+	for _, i := range board.RandomizeBoardIndex() {
 		if b.Board[i] == 0 {
 			b.Board[i] = p.Shape
-			thisScore := -b.minmax(p.InvertShape())
-			//_, thisScore := score(&b, &p)
-
+			thisScore := -minmax(b, p.InvertShape())
 			if thisScore > maxScore {
 				maxScore = thisScore
 				loc = i

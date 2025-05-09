@@ -1,13 +1,15 @@
-package board
+package play
 
 import (
 	"fmt"
 	"time"
 
+	"example.com/tictactoe/ai"
+	"example.com/tictactoe/board"
 	"example.com/tictactoe/player"
 )
 
-func (b *Board) Play(p *player.Player, loc int64) error {
+func play(b *board.Board, p *player.Player, loc int64) error {
 	if b.Board[loc] == 0 {
 		b.Board[loc] = p.Shape
 		return nil
@@ -16,7 +18,7 @@ func (b *Board) Play(p *player.Player, loc int64) error {
 	return fmt.Errorf("location %d is already taken", loc)
 }
 
-func (b *Board) UserPlay(p *player.Player) error {
+func UserPlay(b *board.Board, p *player.Player) error {
 	fmt.Printf("%s's turn to play!\n", p.Name)
 	b.PrintBoard()
 	fmt.Print("\nWhere do you want to play? [0-8]: ")
@@ -28,17 +30,27 @@ func (b *Board) UserPlay(p *player.Player) error {
 		return fmt.Errorf("%s's input is not valid: %d", p.Name, loc)
 	}
 
-	return b.Play(p, loc)
+	return play(b, p, loc)
 }
 
-func (b *Board) ComputerPlay(p *player.Player) error {
+func ComputerPlay(b *board.Board, p *player.Player) error {
 	fmt.Printf("%s's turn to play!\n", p.Name)
 	b.PrintBoard()
 	fmt.Println("Thinking...")
 	time.Sleep(time.Second * 2)
 
-	move := FindBestMove(b, *p)
+	move := ai.FindBestMove(b, *p)
 
-	b.Play(p, move)
+	play(b, p, move)
 	return nil
+}
+
+func GetWinner(winner int, user1 *player.Player, user2 *player.Player) *player.Player {
+	if winner == user1.Shape {
+		return user1
+	} else if winner == user2.Shape {
+		return user2
+	}
+
+	return &player.Player{Name: "Tie", Shape: 0}
 }

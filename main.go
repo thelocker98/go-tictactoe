@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"example.com/tictactoe/board"
-	"example.com/tictactoe/game"
+	"example.com/tictactoe/play"
 	"example.com/tictactoe/player"
 )
 
@@ -28,13 +28,13 @@ func main() {
 		clearScreen()
 
 		if user_first {
-			err := currentboard.UserPlay(user)
+			err := play.UserPlay(&currentboard, user)
 			if err != nil {
 				continue
 			}
 
 		} else {
-			err := currentboard.ComputerPlay(computer)
+			err := play.ComputerPlay(&currentboard, computer)
 			if err != nil {
 				continue
 			}
@@ -47,12 +47,12 @@ func main() {
 	}
 	clearScreen()
 
-	winningUser := game.GetWinner(winner, user, computer)
+	winningUser := play.GetWinner(winner, user, computer)
 	winningUser.EndGame()
 
 	currentboard.PrintBoard()
 }
 
 func clearScreen() {
-	//fmt.Println("\x1b[2J\x1b[H")
+	fmt.Println("\x1b[2J\x1b[H")
 }
