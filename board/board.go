@@ -6,12 +6,12 @@ import (
 )
 
 type Board struct {
-	Board [9]int
+	Board [9]int64 `binding:"required"`
 }
 
 func NewBoard() Board {
 	return Board{
-		Board: [9]int{0, 0, 0, 0, 0, 0, 0, 0, 0},
+		Board: [9]int64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 	}
 }
 
@@ -21,7 +21,7 @@ func (b *Board) PrintBoard() {
 		for r := 0; r < 3; r++ {
 			loc := c*3 + r
 			if b.Board[loc] != 0 {
-				result := map[int]string{-1: "O", 1: "X"}[b.Board[loc]]
+				result := map[int64]string{-1: "O", 1: "X"}[b.Board[loc]]
 				fmt.Print("| ", result, " ")
 			} else {
 				fmt.Print("| ", loc, " ")
@@ -32,11 +32,12 @@ func (b *Board) PrintBoard() {
 	fmt.Print("-------------\n")
 }
 
-func (b *Board) CheckWin() (bool, int) {
+func (b *Board) CheckWin() (bool, int64) {
 	win := false
-	winner := 0
+	var winner int64 = 0
 
-	for i := 0; i < 3; i++ {
+	var i int64
+	for i = 0; i < 3; i++ {
 		if b.Board[i*3] == b.Board[(i*3)+1] && b.Board[(i*3)+1] == b.Board[(i*3)+2] && b.Board[i*3] != 0 {
 			win = true
 			winner = b.Board[i*3]

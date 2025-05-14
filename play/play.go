@@ -45,7 +45,7 @@ func ComputerPlay(b *board.Board, p *player.Player) error {
 	return nil
 }
 
-func GetWinner(winner int, user1 *player.Player, user2 *player.Player) *player.Player {
+func GetWinner(winner int64, user1 *player.Player, user2 *player.Player) *player.Player {
 	if winner == user1.Shape {
 		return user1
 	} else if winner == user2.Shape {

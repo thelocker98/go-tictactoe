@@ -8,12 +8,12 @@ import (
 type Player struct {
 	Name    string
 	GoFirst bool
-	Shape   int
+	Shape   int64 `binding:"required"`
 }
 
 func New(name string, goFirst bool, shape string) (*Player, error) {
 	shape = strings.ToUpper(shape)
-	var structShape int
+	var structShape int64
 
 	if shape == "O" {
 		structShape = -1
