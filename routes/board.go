@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 
 	"example.com/tictactoe/ai"
@@ -21,7 +20,6 @@ func getBestMove(c *gin.Context) {
 	var webBoard webBoard
 
 	err := c.ShouldBindJSON(&webBoard)
-	fmt.Println(webBoard)
 
 	if err != nil || len(webBoard.Board) != 9 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse board"})
@@ -31,13 +29,11 @@ func getBestMove(c *gin.Context) {
 	p.Shape = int64(webBoard.Shape)
 	b.Board = [9]int64(webBoard.Board)
 
-	b.PrintBoard()
-
 	move := ai.FindBestMove(&b, p)
 
-	b.Board[move] = p.Shape
-
-	b.PrintBoard()
+	if move != -1 {
+		b.Board[move] = p.Shape
+	}
 
 	win, winner := b.CheckWin()
 

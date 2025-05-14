@@ -1,8 +1,6 @@
 package ai
 
 import (
-	"fmt"
-
 	"example.com/tictactoe/board"
 	"example.com/tictactoe/player"
 )
@@ -36,7 +34,6 @@ func FindBestMove(b *board.Board, p player.Player) int64 {
 			b.Board[i] = 0
 		}
 	}
-	fmt.Println("best move", loc)
 	return loc
 }
 

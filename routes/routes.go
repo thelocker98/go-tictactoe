@@ -5,7 +5,6 @@ import (
 )
 
 func RegisterRoutes(server *gin.Engine) {
+	server.GET("/game", loadGamePage)
 	server.POST("/game", getBestMove)
-	server.GET("/", loadGamePage)
-
 }

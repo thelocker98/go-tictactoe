@@ -1,7 +1,19 @@
 package main
 
-import "example.com/tictactoe/webserver"
+import (
+	"example.com/tictactoe/db"
+	"example.com/tictactoe/routes"
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
-	webserver.StartWebServer()
+	db.InitDB()
+
+	server := gin.Default()
+
+	server.LoadHTMLGlob("templates/*")
+
+	routes.RegisterRoutes(server)
+
+	server.Run(":8080")
 }
