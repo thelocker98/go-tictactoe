@@ -1,10 +1,12 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	"example.com/tictactoe/ai"
 	"example.com/tictactoe/board"
+	"example.com/tictactoe/models"
 	"example.com/tictactoe/player"
 	"github.com/gin-gonic/gin"
 )
@@ -38,5 +40,11 @@ func getBestMove(c *gin.Context) {
 	win, winner := b.CheckWin()
 
 	c.JSON(http.StatusCreated, gin.H{"win": win, "winner": winner, "move": move, "board": b.Board})
+	createGame()
+}
 
+func createGame() {
+	currentgame, _ := models.NewGame(1, true, -1)
+
+	fmt.Println(currentgame)
 }

@@ -1,10 +1,19 @@
 package routes
 
 import (
+	"example.com/tictactoe/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterRoutes(server *gin.Engine) {
-	server.GET("/game", loadGamePage)
-	server.POST("/game", getBestMove)
+	server.GET("/login", loadLoginPage)
+	server.POST("/login", login)
+	server.GET("/signup", loadSigninPage)
+	server.POST("/signup", signup)
+
+	authenticated := server.Group("/")
+	authenticated.Use(middlewares.Authenticate)
+
+	authenticated.GET("/game", loadGamePage)
+	authenticated.POST("/game", getBestMove)
 }

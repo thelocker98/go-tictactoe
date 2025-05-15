@@ -41,6 +41,7 @@ func createTables() {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER,
 		state TEXT NOT NULL,
+		board TEXT NOT NULL,
 		date DATETIME NOT NULL,
 		FOREIGN KEY(user_id) REFERENCES users(id)
 	);
