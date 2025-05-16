@@ -40,8 +40,8 @@ func createTables() {
 	CREATE TABLE IF NOT EXISTS games (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER,
-		state TEXT NOT NULL,
-		board TEXT NOT NULL,
+		state BLOB NOT NULL,
+		board BLOB NOT NULL,
 		date DATETIME NOT NULL,
 		FOREIGN KEY(user_id) REFERENCES users(id)
 	);
