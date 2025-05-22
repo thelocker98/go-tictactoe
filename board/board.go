@@ -80,27 +80,3 @@ func RandomizeBoardIndex() [9]int64 {
 
 	return numbers
 }
-
-/*
-X       X
-  X   X
-    X
-  X   X
-X       X
-
-
-
-  OOOO
- O     O
-O       O
- O     O
-  OOOO
-
-
-X | X | X
-----------
-X | X | X
-----------
-X | X | X
-
-*/

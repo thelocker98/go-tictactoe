@@ -39,15 +39,19 @@ func createTables() {
 	createGamesTables := `
 	CREATE TABLE IF NOT EXISTS games (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user_id INTEGER,
-		state BLOB NOT NULL,
+		user_owner_id INTEGER NOT NULL,
+		user_owner_shape INTEGER NOT NULL,
+		user_owner_turn_first BOOL NOT NULL,
+		user_player_id INTEGER NOT NULL,
 		board BLOB NOT NULL,
 		date DATETIME NOT NULL,
-		FOREIGN KEY(user_id) REFERENCES users(id)
+		FOREIGN KEY(user_owner_id) REFERENCES users(id),
+		FOREIGN KEY(user_player_id) REFERENCES users(id)
 	);
 	`
 	_, err = DB.Exec(createGamesTables)
 	if err != nil {
 		panic("Could not create games table.")
 	}
+
 }
