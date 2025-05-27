@@ -11,10 +11,14 @@ type User struct {
 	ID       int64
 	Email    string `binding:"required"`
 	Password string `binding:"required"`
+	UserName string
 }
 
 func (u *User) Save() error {
-	query := "INSERT INTO users (email, password) VALUES (?, ?)"
+	if u.Email == "" || u.Password == "" || u.UserName == "" {
+		return errors.New("missing required field")
+	}
+	query := "INSERT INTO users (email, password, username) VALUES (?, ?, ?)"
 	stmt, err := db.DB.Prepare(query)
 
 	if err != nil {
@@ -27,7 +31,7 @@ func (u *User) Save() error {
 		return err
 	}
 
-	result, err := stmt.Exec(u.Email, hashedPassword)
+	result, err := stmt.Exec(u.Email, hashedPassword, u.UserName)
 
 	if err != nil {
 		return err
@@ -58,4 +62,18 @@ func (u *User) ValidateCredentials() error {
 	}
 
 	return nil
+}
+
+func GetUserById(userid int64) (User, error) {
+	query := "SELECT id, email, username FROM users WHERE id = ?"
+	row := db.DB.QueryRow(query, userid)
+
+	var tempUser User
+	err := row.Scan(&tempUser.ID, &tempUser.Email, &tempUser.UserName)
+
+	if err != nil {
+		return User{}, errors.New("invalid userid")
+	}
+
+	return tempUser, nil
 }

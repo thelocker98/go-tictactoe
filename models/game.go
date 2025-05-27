@@ -74,3 +74,31 @@ func GetGameById(gameId int64) (*Game, error) {
 
 	return &game, nil
 }
+
+func GetGameByUserId(userId int64) ([]Game, error) {
+	query := `SELECT * FROM games WHERE user_owner_id = ? or user_player_id = ?`
+	rows, err := db.DB.Query(query, userId, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var games []Game
+
+	for rows.Next() {
+		var game Game
+		var byteBoard []byte
+
+		err = rows.Scan(&game.GameId, &game.UserOwnerId, &game.UserOwnerShape, &game.UserOwnerTurn, &game.UserPlayerId, &byteBoard, &game.DateTime)
+		if err != nil {
+			return nil, err
+		}
+
+		var board board.Board
+		json.Unmarshal(byteBoard, &board)
+		game.Board = board
+
+		games = append(games, game)
+	}
+	return games, nil
+}

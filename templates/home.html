@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Games</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                margin: 0;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            h1 {
+                color: #333;
+                margin-bottom: 20px;
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 80%;
+                max-width: 800px;
+                background-color: #fff;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            th,
+            td {
+                padding: 12px 20px;
+                text-align: center;
+            }
+
+            th {
+                background-color: #007bff;
+                color: white;
+                font-weight: bold;
+            }
+
+            tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+
+            button {
+                background-color: #28a745;
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+            }
+
+            button:hover {
+                background-color: #218838;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Active Games</h1>
+        <table>
+            <tr>
+                <th>You</th>
+                <th>Turn</th>
+                <th>Your Opponent</th>
+                <th>Play</th>
+            </tr>
+            {{range .activegames}}
+            <tr>
+                <td>{{.UserOwnerName}}</td>
+                <td>{{.UserOwnerTurn}}</td>
+                <td>{{.UserPlayerName}}</td>
+                <td>
+                    <button onclick="location.href='games?gameid={{.GameId}}'">
+                        Go to Game
+                    </button>
+                </td>
+            </tr>
+            {{end}}
+        </table>
+
+        <br />
+        <br />
+
+        <h1>Past Games</h1>
+        <table>
+            <tr>
+                <th>You</th>
+                <th>Who Went First</th>
+                <th>Winner</th>
+            </tr>
+            {{range .pastgames}}
+            <tr>
+                <td>{{.UserOwnerName}}</td>
+                <td>{{.UserPlayerName}}</td>
+                <td>{{.Winner}}</td>
+            </tr>
+            {{end}}
+        </table>
+    </body>
+</html>

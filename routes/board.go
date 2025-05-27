@@ -44,9 +44,14 @@ func getBestMove(c *gin.Context) {
 }
 
 func createGame() {
-	currentgame, err := models.NewGame(1, 1, true, 2)
+	currentgame, err := models.NewGame(1, 1, true, 3)
 	fmt.Println(err)
 	fmt.Println(currentgame)
-
 	models.GetGameById(currentgame.GameId)
+
+	allgames, _ := models.GetGameByUserId(2)
+
+	for i, game := range allgames {
+		fmt.Println("Index:", i, "	value:", game)
+	}
 }
