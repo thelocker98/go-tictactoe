@@ -108,6 +108,10 @@ func loadSigninPage(context *gin.Context) {
 	return
 }
 
+func createGamePage(context *gin.Context) {
+	context.HTML(http.StatusOK, "creategame.html", gin.H{"title": "Create Game"})
+}
+
 func logout(context *gin.Context) {
 	context.SetCookie("session", "", -1, "/", "", false, true)
 

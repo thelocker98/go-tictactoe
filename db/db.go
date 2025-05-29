@@ -55,4 +55,6 @@ func createTables() {
 		panic("Could not create games table.")
 	}
 
+	query := "INSERT INTO users comuter@local, nologin, computer"
+	_, err = DB.Exec(query)
 }
