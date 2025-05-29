@@ -10,14 +10,14 @@ func RegisterRoutes(server *gin.Engine) {
 	server.POST("/login", login)
 	server.GET("/signup", loadSigninPage)
 	server.POST("/signup", signup)
-	server.GET("/", loadHomePage)
-	server.GET("/game", loadGamePage)
-	server.GET("/test", test)
 
 	authenticated := server.Group("/")
 	authenticated.Use(middlewares.Authenticate)
 
+	authenticated.GET("/", loadHomePage)
+	authenticated.GET("/game", loadGamePage)
 	authenticated.POST("/game", getBestMove)
 	authenticated.POST("/newgame", getBestMove)
 	authenticated.POST("/resumegame", getBestMove)
+	authenticated.GET("/logout", logout)
 }

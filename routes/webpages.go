@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"example.com/tictactoe/models"
+	"example.com/tictactoe/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +19,10 @@ type webView struct {
 }
 
 func loadHomePage(context *gin.Context) {
-	games, err := models.GetGameByUserId(1)
+	userId := context.GetInt64("userId")
+
+	games, err := models.GetGameByUserId(userId)
+
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Bad User"})
 	}
@@ -54,7 +58,6 @@ func loadHomePage(context *gin.Context) {
 
 			activeGames = append(activeGames, tempGame)
 		}
-		fmt.Println(tempGame, game.Board)
 	}
 
 	fmt.Println("done")
@@ -70,18 +73,44 @@ func loadGamePage(context *gin.Context) {
 }
 
 func loadLoginPage(context *gin.Context) {
-	context.HTML(http.StatusOK, "login.html", gin.H{"title": "Login"})
+	cookie, err := context.Cookie("session")
+	if err != nil {
+		context.HTML(http.StatusOK, "login.html", gin.H{"title": "Login"})
+		return
+	}
+
+	_, err = utils.VerifyToken(cookie)
+	if err != nil {
+		context.HTML(http.StatusOK, "login.html", gin.H{"title": "Login"})
+		return
+	}
+
+	context.Redirect(http.StatusFound, "/")
+	context.Abort()
+	return
 }
 
 func loadSigninPage(context *gin.Context) {
-	context.HTML(http.StatusOK, "signup.html", gin.H{"title": "Signup"})
-}
-
-func test(c *gin.Context) {
-	cookie, err := c.Cookie("")
+	cookie, err := context.Cookie("session")
 	if err != nil {
-		c.String(http.StatusNotFound, "Cookie not found")
+		context.HTML(http.StatusOK, "signup.html", gin.H{"title": "Signup"})
 		return
 	}
-	c.String(http.StatusOK, "Cookie value: %s", cookie)
+
+	_, err = utils.VerifyToken(cookie)
+	if err != nil {
+		context.HTML(http.StatusOK, "signup.html", gin.H{"title": "Signup"})
+		return
+	}
+
+	context.Redirect(http.StatusFound, "/")
+	context.Abort()
+	return
+}
+
+func logout(context *gin.Context) {
+	context.SetCookie("session", "", -1, "/", "", false, true)
+
+	context.Redirect(http.StatusFound, "/login")
+	context.Abort()
 }
