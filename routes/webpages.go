@@ -21,10 +21,13 @@ type webView struct {
 func loadHomePage(context *gin.Context) {
 	userId := context.GetInt64("userId")
 
+	fmt.Println(userId)
+
 	games, err := models.GetGameByUserId(userId)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Bad User"})
+		return
 	}
 
 	var activeGames []webView
@@ -36,7 +39,7 @@ func loadHomePage(context *gin.Context) {
 		owner, err1 := models.GetUserById(game.UserOwnerId)
 		player, err2 := models.GetUserById(game.UserPlayerId)
 		if err1 != nil || err2 != nil {
-			context.JSON(http.StatusBadRequest, gin.H{"message": "Bad User"})
+			continue
 		}
 
 		var tempGame webView

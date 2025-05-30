@@ -44,6 +44,7 @@ func createTables() {
 		user_owner_shape INTEGER NOT NULL,
 		user_owner_turn_first BOOL NOT NULL,
 		user_player_id INTEGER NOT NULL,
+		status STRING NOT NULL,
 		board BLOB NOT NULL,
 		date DATETIME NOT NULL,
 		FOREIGN KEY(user_owner_id) REFERENCES users(id),
@@ -55,6 +56,21 @@ func createTables() {
 		panic("Could not create games table.")
 	}
 
-	query := "INSERT INTO users comuter@local, nologin, computer"
-	_, err = DB.Exec(query)
+	// Enable foreign key constraints
+	_, err = DB.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		panic("Failed to enable foreign key constraints:")
+	}
+
+	query := `
+INSERT INTO users (email, password, username)
+SELECT ?, ?, ?
+WHERE NOT EXISTS (
+    SELECT 1 FROM users WHERE username = ?
+)`
+	_, err = DB.Exec(query, "computer@local", "nologin", "computer", "computer")
+
+	if err != nil {
+		panic(err)
+	}
 }

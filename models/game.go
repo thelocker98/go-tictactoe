@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -15,12 +16,19 @@ type Game struct {
 	UserOwnerShape int64       `binding:"required"`
 	UserOwnerTurn  bool        `binding:"required"`
 	UserPlayerId   int64       `binding:"required"`
+	Status         string      `binding:"required"`
 	Board          board.Board `binding:"required"`
 	DateTime       time.Time   `binding:"required"`
 }
 
 func NewGame(userOwnerId int64, userOwnerShape int64, userOwnerTurnFirst bool, userPlayerId int64) (Game, error) {
-	query := "INSERT INTO games (user_owner_id, user_owner_shape, user_owner_turn_first, user_player_id, board, date) VALUES (?, ?, ?, ?, ?, ?)"
+	status := "PENDING"
+	if !(userOwnerShape == 1 || userOwnerShape == -1) {
+		fmt.Println(userOwnerShape)
+		return Game{}, errors.New("invalid userOwnerShape")
+	}
+
+	query := "INSERT INTO games (user_owner_id, user_owner_shape, user_owner_turn_first, user_player_id, status, board, date) VALUES (?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := db.DB.Prepare(query)
 
 	if err != nil {
@@ -33,7 +41,7 @@ func NewGame(userOwnerId int64, userOwnerShape int64, userOwnerTurnFirst bool, u
 
 	jsonBoardState, _ := json.Marshal(newBoard)
 
-	result, err := stmt.Exec(userOwnerId, userOwnerShape, userOwnerTurnFirst, userPlayerId, jsonBoardState, currentTime)
+	result, err := stmt.Exec(userOwnerId, userOwnerShape, userOwnerTurnFirst, userPlayerId, status, jsonBoardState, currentTime)
 
 	if err != nil {
 		fmt.Println(err)
@@ -62,7 +70,7 @@ func GetGameById(gameId int64) (*Game, error) {
 	var game Game
 	var byteBoard []byte
 
-	err := row.Scan(&game.GameId, &game.UserOwnerId, &game.UserOwnerShape, &game.UserOwnerTurn, &game.UserPlayerId, &byteBoard, &game.DateTime)
+	err := row.Scan(&game.GameId, &game.UserOwnerId, &game.UserOwnerShape, &game.UserOwnerTurn, &game.UserPlayerId, &game.Status, &byteBoard, &game.DateTime)
 
 	var board board.Board
 	json.Unmarshal(byteBoard, &board)
@@ -89,7 +97,7 @@ func GetGameByUserId(userId int64) ([]Game, error) {
 		var game Game
 		var byteBoard []byte
 
-		err = rows.Scan(&game.GameId, &game.UserOwnerId, &game.UserOwnerShape, &game.UserOwnerTurn, &game.UserPlayerId, &byteBoard, &game.DateTime)
+		err = rows.Scan(&game.GameId, &game.UserOwnerId, &game.UserOwnerShape, &game.UserOwnerTurn, &game.UserPlayerId, &game.Status, &byteBoard, &game.DateTime)
 		if err != nil {
 			return nil, err
 		}

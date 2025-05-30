@@ -8,11 +8,11 @@ import (
 )
 
 func Authenticate(context *gin.Context) {
-
+	var token string
 	cookie, err := context.Cookie("session")
 	if err != nil {
 		// No Cookie Found so try header
-		token := context.Request.Header.Get("Authorization")
+		token = context.Request.Header.Get("Authorization")
 
 		// check if it is empty
 		if token == "" {
@@ -26,7 +26,11 @@ func Authenticate(context *gin.Context) {
 
 	userId, err := utils.VerifyToken(cookie)
 	if err != nil {
-		context.Redirect(http.StatusFound, "/login?status=pleaselogin")
+		if token != "" {
+			context.JSON(http.StatusBadRequest, gin.H{"message": "invalid authorization header"})
+		} else {
+			context.Redirect(http.StatusFound, "/login?status=pleaselogin")
+		}
 		context.Abort()
 		return
 	}

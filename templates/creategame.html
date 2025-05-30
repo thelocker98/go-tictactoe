@@ -117,7 +117,7 @@
         <button onclick="location.href='/logout'">Logout</button>
         <h1>Create New Game</h1>
 
-        <form action="/creategame" method="POST">
+        <form id="createGameForm">
             <label for="opponentType">Opponent:</label>
             <select
                 id="opponentType"
@@ -128,7 +128,6 @@
                 <option value="human">Choose a Player</option>
             </select>
 
-            <!-- <label for="opponentInput">Opponent:</label> -->
             <input
                 type="text"
                 id="opponentInput"
@@ -256,14 +255,13 @@
                 { id: 99, name: "VaporWitch" },
                 { id: 100, name: "OmegaDuck" },
             ];
-
             const input = document.getElementById("opponentInput");
             const suggestionsBox = document.getElementById("suggestions");
 
             let blurTimeout;
 
             input.addEventListener("input", () => {
-                clearTimeout(blurTimeout); // prevent premature clear
+                clearTimeout(blurTimeout);
                 const value = input.value.toLowerCase();
                 suggestionsBox.innerHTML = "";
 
@@ -289,13 +287,10 @@
             });
 
             input.addEventListener("blur", () => {
-                // Small delay so click can register before clearing
                 blurTimeout = setTimeout(() => {
                     suggestionsBox.innerHTML = "";
                 }, 150);
             });
-
-            //test
 
             function toggleOpponentInput() {
                 const type = document.getElementById("opponentType").value;
@@ -304,6 +299,61 @@
             }
 
             toggleOpponentInput();
+
+            document
+                .getElementById("createGameForm")
+                .addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    const opponentType =
+                        document.getElementById("opponentType").value;
+                    const first =
+                        document.getElementById("turnChoice").value === "me";
+                    const shape =
+                        document.getElementById("symbolChoice").value === "X"
+                            ? -1
+                            : 1;
+
+                    let opponentId;
+                    if (opponentType === "computer") {
+                        opponentId = 1;
+                    } else {
+                        const name = document
+                            .getElementById("opponentInput")
+                            .value.trim();
+                        const player = players.find((p) => p.name === name);
+                        if (!player) {
+                            alert("Player not found!");
+                            return;
+                        }
+                        opponentId = player.id;
+                    }
+
+                    fetch("/creategame", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: document.cookie,
+                        },
+                        body: JSON.stringify({
+                            opponent: opponentId,
+                            first: first,
+                            shape: shape,
+                        }),
+                    })
+                        .then((response) => {
+                            if (!response.ok)
+                                throw new Error("Game creation failed.");
+                            return response.json();
+                        })
+                        .then((data) => {
+                            window.location.href = "/";
+                        })
+                        .catch((err) => {
+                            console.error(err);
+                            alert("Failed to create game.");
+                        });
+                });
         </script>
     </body>
 </html>

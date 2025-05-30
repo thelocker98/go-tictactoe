@@ -17,7 +17,7 @@ func RegisterRoutes(server *gin.Engine) {
 	authenticated.GET("/", loadHomePage)
 
 	authenticated.GET("/creategame", createGamePage)
-	authenticated.POST("/creategame", createGamePage)
+	authenticated.POST("/creategame", createGame)
 
 	authenticated.GET("/game", loadGamePage)
 	authenticated.POST("/game", getBestMove)

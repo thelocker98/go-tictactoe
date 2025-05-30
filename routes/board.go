@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 
 	"example.com/tictactoe/ai"
@@ -16,15 +15,21 @@ type webBoard struct {
 	Shape int64   `json:"shape" binding:"required"`
 }
 
-func getBestMove(c *gin.Context) {
+type webCreateGame struct {
+	Opponent int64 `json:"opponent" binding:"required"`
+	First    *bool `json:"first" binding:"required"`
+	Shape    int64 `json:"shape" binding:"required"`
+}
+
+func getBestMove(context *gin.Context) {
 	var p player.Player
 	var b board.Board
 	var webBoard webBoard
 
-	err := c.ShouldBindJSON(&webBoard)
+	err := context.ShouldBindJSON(&webBoard)
 
 	if err != nil || len(webBoard.Board) != 9 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse board"})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse board"})
 		return
 	}
 
@@ -39,19 +44,25 @@ func getBestMove(c *gin.Context) {
 
 	win, winner := b.CheckWin()
 
-	c.JSON(http.StatusCreated, gin.H{"win": win, "winner": winner, "move": move, "board": b.Board})
-	createGame()
+	context.JSON(http.StatusCreated, gin.H{"win": win, "winner": winner, "move": move, "board": b.Board})
 }
 
-func createGame() {
-	currentgame, err := models.NewGame(1, 1, true, 3)
-	fmt.Println(err)
-	fmt.Println(currentgame)
-	models.GetGameById(currentgame.GameId)
+func createGame(context *gin.Context) {
+	var webCreateGame webCreateGame
 
-	allgames, _ := models.GetGameByUserId(2)
+	err := context.ShouldBindJSON(&webCreateGame)
 
-	for i, game := range allgames {
-		fmt.Println("Index:", i, "	value:", game)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse"})
+		return
 	}
+
+	newGame, err := models.NewGame(context.GetInt64("userId"), webCreateGame.Shape, *webCreateGame.First, webCreateGame.Opponent)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse"})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"gameId": newGame.GameId})
 }
