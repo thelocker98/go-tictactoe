@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"example.com/tictactoe/models"
 	"example.com/tictactoe/utils"
@@ -20,8 +21,6 @@ type webView struct {
 
 func loadHomePage(context *gin.Context) {
 	userId := context.GetInt64("userId")
-
-	fmt.Println(userId)
 
 	games, err := models.GetGameByUserId(userId)
 
@@ -63,8 +62,6 @@ func loadHomePage(context *gin.Context) {
 		}
 	}
 
-	fmt.Println("done")
-
 	context.HTML(http.StatusOK, "home.html", gin.H{
 		"activegames": activeGames,
 		"pastgames":   pastGames,
@@ -72,7 +69,28 @@ func loadHomePage(context *gin.Context) {
 }
 
 func loadGamePage(context *gin.Context) {
-	context.HTML(http.StatusOK, "game.html", gin.H{"title": "Tic Tac Toe"})
+	userId := context.GetInt64("userId")
+
+	gameId, err1 := strconv.ParseInt(context.Param("id"), 10, 64)
+	game, err2 := models.GetGameById(gameId)
+
+	if err1 != nil || err2 != nil {
+		context.HTML(http.StatusOK, "error.html", gin.H{"ErrorMessage": "This game does not exist"})
+		return
+	}
+	fmt.Println(game.UserOwnerId, game.UserPlayerId, userId)
+
+	if game.UserOwnerId != userId && game.UserPlayerId != userId {
+		context.HTML(http.StatusOK, "error.html", gin.H{"ErrorMessage": "You are not a player in this game"})
+		return
+	}
+
+	if game.Status == "PENDING" {
+		context.HTML(http.StatusOK, "error.html", gin.H{"ErrorMessage": "This Game is Pending. Please wait for your opponent to accept your game invitation"})
+		return
+	}
+
+	context.HTML(http.StatusOK, "game.html", gin.H{})
 }
 
 func loadLoginPage(context *gin.Context) {

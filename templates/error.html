@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Error</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                margin: 0;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                text-align: center;
+            }
+
+            h1 {
+                color: #d9534f;
+                margin-bottom: 20px;
+            }
+
+            p {
+                color: #555;
+                margin-bottom: 30px;
+                font-size: 18px;
+            }
+
+            button {
+                background-color: #007bff;
+                color: white;
+                border: none;
+                padding: 10px 16px;
+                margin: 5px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Error</h1>
+        <p>{{.ErrorMessage}}</p>
+        <button onclick="location.href='/logout'">Logout</button>
+        <button onclick="location.href='/'">Home</button>
+    </body>
+</html>
