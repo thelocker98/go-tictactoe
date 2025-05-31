@@ -8,6 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type webUserList struct {
+	Id   int64  `json:"id" binding:"required"`
+	Name string `json:"name" binding:"required"`
+}
+
 func signup(context *gin.Context) {
 	var user models.User
 	err := context.ShouldBindJSON(&user)
@@ -49,4 +54,24 @@ func login(context *gin.Context) {
 
 	context.SetCookie("session", token, 3600, "/", "", false, true)
 	context.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": token})
+}
+
+func getAllUsers(context *gin.Context) {
+	var webUsers []webUserList
+
+	users, err := models.GetAllUser()
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "error"})
+		return
+	}
+
+	for _, user := range users {
+		var tempuser webUserList
+		tempuser.Id = user.ID
+		tempuser.Name = user.UserName
+
+		webUsers = append(webUsers, tempuser)
+	}
+
+	context.JSON(http.StatusOK, gin.H{"users": webUsers})
 }

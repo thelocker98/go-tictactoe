@@ -153,111 +153,30 @@
         </form>
 
         <script>
-            const players = [
-                { id: 1, name: "PixelWizard" },
-                { id: 2, name: "CodeNinja" },
-                { id: 3, name: "ShadowKnight" },
-                { id: 4, name: "EchoFalcon" },
-                { id: 5, name: "FrostByte" },
-                { id: 6, name: "NeonSamurai" },
-                { id: 7, name: "BlazeRider" },
-                { id: 8, name: "QuantumZebra" },
-                { id: 9, name: "CyberWolf" },
-                { id: 10, name: "AstroBear" },
-                { id: 11, name: "NovaSpark" },
-                { id: 12, name: "SilentComet" },
-                { id: 13, name: "ByteBandit" },
-                { id: 14, name: "SudoStorm" },
-                { id: 15, name: "InfernoPanda" },
-                { id: 16, name: "OrbitSniper" },
-                { id: 17, name: "HyperViper" },
-                { id: 18, name: "RocketSloth" },
-                { id: 19, name: "GlitchGhost" },
-                { id: 20, name: "TurboOtter" },
-                { id: 21, name: "PhantomRogue" },
-                { id: 22, name: "CaptainCrater" },
-                { id: 23, name: "ZeroZen" },
-                { id: 24, name: "ArcticPhantom" },
-                { id: 25, name: "RoboMantis" },
-                { id: 26, name: "VelvetTiger" },
-                { id: 27, name: "IronKoala" },
-                { id: 28, name: "DigitalRaven" },
-                { id: 29, name: "SolarRhino" },
-                { id: 30, name: "LuckyByte" },
-                { id: 31, name: "LunarCobra" },
-                { id: 32, name: "CobaltCrush" },
-                { id: 33, name: "MagmaFang" },
-                { id: 34, name: "NeonNarwhal" },
-                { id: 35, name: "EchoLynx" },
-                { id: 36, name: "CrashOwl" },
-                { id: 37, name: "SteelTornado" },
-                { id: 38, name: "BinaryLlama" },
-                { id: 39, name: "FireTalon" },
-                { id: 40, name: "VenomByte" },
-                { id: 41, name: "SkyWarden" },
-                { id: 42, name: "HoloFox" },
-                { id: 43, name: "MeteorSloth" },
-                { id: 44, name: "OrbitMoose" },
-                { id: 45, name: "BladeJaguar" },
-                { id: 46, name: "QuantumOx" },
-                { id: 47, name: "WarpSeeker" },
-                { id: 48, name: "GigaBeetle" },
-                { id: 49, name: "StormPenguin" },
-                { id: 50, name: "ToxicToad" },
-                { id: 51, name: "FeralBinary" },
-                { id: 52, name: "ZebraNova" },
-                { id: 53, name: "DriftPixel" },
-                { id: 54, name: "SaberEcho" },
-                { id: 55, name: "CometCraze" },
-                { id: 56, name: "DarkMatter" },
-                { id: 57, name: "BlitzTusk" },
-                { id: 58, name: "MysticSpike" },
-                { id: 59, name: "PlasmaOtter" },
-                { id: 60, name: "ShadowVolt" },
-                { id: 61, name: "TechTornado" },
-                { id: 62, name: "VortexStag" },
-                { id: 63, name: "NanoDrift" },
-                { id: 64, name: "ThunderJackal" },
-                { id: 65, name: "LaserPenguin" },
-                { id: 66, name: "BytePhoenix" },
-                { id: 67, name: "AeroCoyote" },
-                { id: 68, name: "IronStingray" },
-                { id: 69, name: "TwilightViper" },
-                { id: 70, name: "CyberBasilisk" },
-                { id: 71, name: "ArcticRaptor" },
-                { id: 72, name: "SmashKraken" },
-                { id: 73, name: "FrostFeline" },
-                { id: 74, name: "TurboMongoose" },
-                { id: 75, name: "PulseDragon" },
-                { id: 76, name: "IceWarden" },
-                { id: 77, name: "ZeroTundra" },
-                { id: 78, name: "RocketOrca" },
-                { id: 79, name: "DataWolf" },
-                { id: 80, name: "NeoTarantula" },
-                { id: 81, name: "AstroGolem" },
-                { id: 82, name: "PhantomYak" },
-                { id: 83, name: "SilentMeteor" },
-                { id: 84, name: "CyborgOtter" },
-                { id: 85, name: "ScorchWombat" },
-                { id: 86, name: "WhirlwindCrab" },
-                { id: 87, name: "QuantumMole" },
-                { id: 88, name: "ShatterBison" },
-                { id: 89, name: "ElectricBadger" },
-                { id: 90, name: "NovaTurtle" },
-                { id: 91, name: "EchoCheetah" },
-                { id: 92, name: "PixelWasp" },
-                { id: 93, name: "IronFalcon" },
-                { id: 94, name: "OrbitBear" },
-                { id: 95, name: "StarlightFox" },
-                { id: 96, name: "NebulaCat" },
-                { id: 97, name: "ZodiacShark" },
-                { id: 98, name: "CrimsonBat" },
-                { id: 99, name: "VaporWitch" },
-                { id: 100, name: "OmegaDuck" },
-            ];
+            let players = [];
+
+            async function loadPlayers() {
+                try {
+                    const response = await fetch("/users", {
+                        method: "GET",
+                        headers: {
+                            Authorization: document.cookie,
+                        },
+                    });
+
+                    if (!response.ok) throw new Error("Failed to fetch users");
+
+                    const data = await response.json();
+                    players = data.users.filter(
+                        (user) => user.name.toLowerCase() !== "computer",
+                    );
+                } catch (error) {
+                    console.error("Error loading users:", error);
+                }
+            }
+
             const input = document.getElementById("opponentInput");
             const suggestionsBox = document.getElementById("suggestions");
-
             let blurTimeout;
 
             input.addEventListener("input", () => {
@@ -299,6 +218,7 @@
             }
 
             toggleOpponentInput();
+            loadPlayers();
 
             document
                 .getElementById("createGameForm")

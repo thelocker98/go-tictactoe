@@ -77,3 +77,25 @@ func GetUserById(userid int64) (User, error) {
 
 	return tempUser, nil
 }
+
+func GetAllUser() ([]User, error) {
+	query := "SELECT id, email, username FROM users"
+	rows, err := db.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []User
+
+	for rows.Next() {
+		var tempUser User
+		err := rows.Scan(&tempUser.ID, &tempUser.Email, &tempUser.UserName)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, tempUser)
+	}
+	return users, nil
+}
