@@ -74,3 +74,35 @@ func acceptGame(context *gin.Context) {
 
 	context.JSON(http.StatusBadRequest, gin.H{"message": "game is in the wrong state"})
 }
+
+func deleteGame(context *gin.Context) {
+	userId := context.GetInt64("userId")
+
+	gameId, err1 := strconv.ParseInt(context.Param("id"), 10, 64)
+	game, err2 := models.GetGameById(gameId)
+
+	if err1 != nil || err2 != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "game does not exist"})
+		return
+	}
+
+	if game.UserOwnerId != userId {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "you do not have permission to access this game"})
+		return
+	}
+	if game.Status == "DENYED" || game.Status == "PENDING" {
+
+		err := models.DeleteGame(game)
+		fmt.Println(game, err)
+
+		if err != nil {
+			context.JSON(http.StatusBadRequest, gin.H{"message": "error writing database"})
+			return
+		}
+
+		context.JSON(http.StatusOK, gin.H{"message": "Game Deleted Successfuly"})
+		return
+	}
+
+	context.JSON(http.StatusBadRequest, gin.H{"message": "game is in the wrong state"})
+}

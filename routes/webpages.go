@@ -45,8 +45,10 @@ func loadHomePage(context *gin.Context) {
 		tempGame.GameId = game.GameId
 		tempGame.UserOwnerName = owner.UserName
 		tempGame.UserPlayerName = player.UserName
-		if game.Status == "PENDING" && game.UserPlayerId != userId {
+		if game.Status == "PENDING" && game.UserOwnerId == userId {
 			tempGame.Status = "PENDING_OP"
+		} else if game.Status == "DENYED" && game.UserOwnerId != userId {
+			tempGame.Status = "DENYED_OP"
 		} else {
 			tempGame.Status = game.Status
 		}
@@ -61,10 +63,9 @@ func loadHomePage(context *gin.Context) {
 			}
 
 			pastGames = append(pastGames, tempGame)
-		} else if tempGame.Status == "DENYED" {
+		} else if tempGame.Status == "DENYED" || tempGame.Status == "DENYED_OP" {
 			pastGames = append(pastGames, tempGame)
 		} else {
-
 			activeGames = append(activeGames, tempGame)
 		}
 	}

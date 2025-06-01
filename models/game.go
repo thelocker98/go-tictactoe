@@ -82,12 +82,26 @@ WHERE id = ?`
 	}
 	defer stmt.Close()
 
-	newBoard := board.NewBoard()
 	currentTime := time.Now()
 
-	jsonBoardState, _ := json.Marshal(newBoard)
+	jsonBoardState, _ := json.Marshal(game.Board)
 
 	_, err = stmt.Exec(game.UserOwnerId, game.UserOwnerShape, game.UserOwnerTurn, game.UserPlayerId, game.Status, jsonBoardState, currentTime, game.GameId)
+
+	return err
+}
+
+func DeleteGame(game *Game) error {
+	query := `DELETE FROM games WHERE id = ?`
+
+	stmt, err := db.DB.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(game.GameId)
 
 	return err
 }

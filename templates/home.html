@@ -119,7 +119,8 @@
                     <button onclick="handleAction('/delete/{{.GameId}}')">
                         Delete
                     </button>
-                    {{else}} {{.Winner}} {{end}}
+                    {{else if eq .Status "DENYED_OP"}} Declined {{else}}
+                    {{.Winner}} {{end}}
                 </td>
             </tr>
             {{end}}
