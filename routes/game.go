@@ -58,7 +58,7 @@ func acceptGame(context *gin.Context) {
 		return
 	}
 	if game.Status == "PENDING" {
-		game.Status = "ACCEPT"
+		game.Status = "ACCEPTED"
 
 		err := models.UpdateGame(game)
 		fmt.Println(game, err)

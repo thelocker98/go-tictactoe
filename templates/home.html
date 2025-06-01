@@ -77,9 +77,24 @@
                 <td>{{.UserOwnerTurn}}</td>
                 <td>{{.UserPlayerName}}</td>
                 <td>
-                    <button onclick="location.href='game/{{.GameId}}'">
-                        Go to Game
+                    {{if eq .Status "PENDING"}}
+                    <button onclick="handleAction('/accept/{{.GameId}}')">
+                        Accept
                     </button>
+                    <button onclick="handleAction('/reject/{{.GameId}}')">
+                        Reject
+                    </button>
+                    {{else if eq .Status "PENDING_OP"}}
+                    <button>Pending...</button>
+                    {{else if eq .Status "DENYED"}}
+                    <button onclick="handleAction('/delete/{{.GameId}}')">
+                        Delete
+                    </button>
+                    {{else if eq .Status "ACCEPTED"}}
+                    <button onclick="location.href='/game/{{.GameId}}'">
+                        Play
+                    </button>
+                    {{end}}
                 </td>
             </tr>
             {{end}}
@@ -99,9 +114,30 @@
             <tr>
                 <td>{{.UserOwnerName}}</td>
                 <td>{{.UserPlayerName}}</td>
-                <td>{{.Winner}}</td>
+                <td>
+                    {{if eq .Status "DENYED"}}
+                    <button onclick="handleAction('/delete/{{.GameId}}')">
+                        Delete
+                    </button>
+                    {{else}} {{.Winner}} {{end}}
+                </td>
             </tr>
             {{end}}
         </table>
     </body>
+    <script>
+        function handleAction(url) {
+            fetch(url)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Request failed");
+                    }
+                    // Refresh the page after the request completes
+                    location.reload();
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                });
+        }
+    </script>
 </html>
