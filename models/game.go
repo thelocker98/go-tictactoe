@@ -63,6 +63,35 @@ func NewGame(userOwnerId int64, userOwnerShape int64, userOwnerTurnFirst bool, u
 	return newGame, err
 }
 
+func UpdateGame(game *Game) error {
+	query := `
+UPDATE games
+SET user_owner_id = ?,
+    user_owner_shape = ?,
+    user_owner_turn_first = ?,
+    user_player_id = ?,
+    status = ?,
+    board = ?,
+    date = ?
+WHERE id = ?`
+
+	stmt, err := db.DB.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	newBoard := board.NewBoard()
+	currentTime := time.Now()
+
+	jsonBoardState, _ := json.Marshal(newBoard)
+
+	_, err = stmt.Exec(game.UserOwnerId, game.UserOwnerShape, game.UserOwnerTurn, game.UserPlayerId, game.Status, jsonBoardState, currentTime, game.GameId)
+
+	return err
+}
+
 func GetGameById(gameId int64) (*Game, error) {
 	query := `SELECT * FROM games WHERE id = ?`
 	row := db.DB.QueryRow(query, gameId)

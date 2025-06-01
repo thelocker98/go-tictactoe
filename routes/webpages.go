@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -75,13 +74,12 @@ func loadGamePage(context *gin.Context) {
 	game, err2 := models.GetGameById(gameId)
 
 	if err1 != nil || err2 != nil {
-		context.HTML(http.StatusOK, "error.html", gin.H{"ErrorMessage": "This game does not exist"})
+		context.HTML(http.StatusBadRequest, "error.html", gin.H{"ErrorMessage": "This game does not exist"})
 		return
 	}
-	fmt.Println(game.UserOwnerId, game.UserPlayerId, userId)
 
 	if game.UserOwnerId != userId && game.UserPlayerId != userId {
-		context.HTML(http.StatusOK, "error.html", gin.H{"ErrorMessage": "You are not a player in this game"})
+		context.HTML(http.StatusUnauthorized, "error.html", gin.H{"ErrorMessage": "You are not a player in this game"})
 		return
 	}
 
