@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -10,9 +9,9 @@ import (
 )
 
 type webCreateGame struct {
-	Opponent  int64 `json:"opponent" binding:"required"`
-	UserFirst int64 `json:"user_first" binding:"required"`
-	Shape     int64 `json:"shape" binding:"required"`
+	Opponent     int64 `json:"opponent" binding:"required"`
+	Creatorfirst *bool `json:"creator_first" binding:"required"`
+	Shape        int64 `json:"shape" binding:"required"`
 }
 
 func createGame(context *gin.Context) {
@@ -20,13 +19,19 @@ func createGame(context *gin.Context) {
 	userId := context.GetInt64("userId")
 
 	err := context.ShouldBindJSON(&webCreateGame)
-
-	if err != nil || (webCreateGame.UserFirst != userId && webCreateGame.UserFirst != webCreateGame.Opponent) || userId == webCreateGame.Opponent {
+	if err != nil || userId == webCreateGame.Opponent {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse"})
 		return
 	}
 
-	newGame, err := models.NewGame(context.GetInt64("userId"), webCreateGame.Shape, webCreateGame.UserFirst, webCreateGame.Opponent)
+	var userFirst int64
+	if *webCreateGame.Creatorfirst {
+		userFirst = userId
+	} else {
+		userFirst = webCreateGame.Opponent
+	}
+
+	newGame, err := models.NewGame(context.GetInt64("userId"), webCreateGame.Shape, userFirst, webCreateGame.Opponent)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse"})
@@ -55,8 +60,6 @@ func acceptGame(context *gin.Context) {
 		game.Status = "ACCEPTED"
 
 		err := models.UpdateGame(game)
-		fmt.Println(game, err)
-
 		if err != nil {
 			context.JSON(http.StatusBadRequest, gin.H{"message": "error writing database"})
 			return
@@ -88,7 +91,6 @@ func rejectGame(context *gin.Context) {
 		game.Status = "DENYED"
 
 		err := models.UpdateGame(game)
-		fmt.Println(game, err)
 
 		if err != nil {
 			context.JSON(http.StatusBadRequest, gin.H{"message": "error writing database"})
@@ -120,7 +122,6 @@ func deleteGame(context *gin.Context) {
 	if game.Status == "DENYED" || game.Status == "PENDING" {
 
 		err := models.DeleteGame(game)
-		fmt.Println(game, err)
 
 		if err != nil {
 			context.JSON(http.StatusBadRequest, gin.H{"message": "error writing database"})

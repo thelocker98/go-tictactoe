@@ -231,8 +231,8 @@
                         document.getElementById("turnChoice").value === "me";
                     const shape =
                         document.getElementById("symbolChoice").value === "X"
-                            ? -1
-                            : 1;
+                            ? 1
+                            : -1;
 
                     let opponentId;
                     if (opponentType === "computer") {
@@ -257,7 +257,7 @@
                         },
                         body: JSON.stringify({
                             opponent: opponentId,
-                            first: first,
+                            creator_first: first,
                             shape: shape,
                         }),
                     })

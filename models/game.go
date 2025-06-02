@@ -3,7 +3,6 @@ package models
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	"example.com/tictactoe/board"
@@ -24,7 +23,6 @@ type Game struct {
 func NewGame(userOwnerId int64, userOwnerShape int64, currentTurn int64, userPlayerId int64) (Game, error) {
 	status := "PENDING"
 	if !(userOwnerShape == 1 || userOwnerShape == -1) {
-		fmt.Println(userOwnerShape)
 		return Game{}, errors.New("invalid userOwnerShape")
 	}
 
@@ -44,7 +42,6 @@ func NewGame(userOwnerId int64, userOwnerShape int64, currentTurn int64, userPla
 	result, err := stmt.Exec(userOwnerId, userOwnerShape, currentTurn, userPlayerId, status, jsonBoardState, currentTime)
 
 	if err != nil {
-		fmt.Println(err)
 		return Game{}, err
 	}
 
