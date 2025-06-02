@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"strconv"
 
 	"example.com/tictactoe/ai"
 	"example.com/tictactoe/board"
@@ -75,6 +76,24 @@ func playMove(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusBadRequest, gin.H{"message": "successful play"})
+}
+
+func getBoardLayout(context *gin.Context) {
+	userId := context.GetInt64("userId")
+
+	gameId, err1 := strconv.ParseInt(context.Param("id"), 10, 64)
+	game, err2 := models.GetGameById(gameId)
+
+	if err1 != nil || err2 != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "game does not exist"})
+		return
+	}
+	if (userId != game.UserOwnerId && userId != game.UserPlayerId) || game.Status != "ACCEPTED" {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "do not have access to this game"})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"board": game.Board})
 }
 
 func getBestMove(context *gin.Context) {
