@@ -12,7 +12,7 @@ import (
 type webView struct {
 	GameId          int64
 	UserOwnerName   string
-	UserOwnerTurn   string
+	CurrentTurn     string
 	UserPlayerName  string
 	UserPlayerShape string
 	Status          string

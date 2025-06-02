@@ -9,7 +9,7 @@ import (
 	"example.com/tictactoe/player"
 )
 
-func play(b *board.Board, p *player.Player, loc int64) error {
+func Play(b *board.Board, p *player.Player, loc int64) error {
 	if b.Board[loc] == 0 {
 		b.Board[loc] = p.Shape
 		return nil
@@ -30,7 +30,7 @@ func UserPlay(b *board.Board, p *player.Player) error {
 		return fmt.Errorf("%s's input is not valid: %d", p.Name, loc)
 	}
 
-	return play(b, p, loc)
+	return Play(b, p, loc)
 }
 
 func ComputerPlay(b *board.Board, p *player.Player) error {
@@ -41,7 +41,7 @@ func ComputerPlay(b *board.Board, p *player.Player) error {
 
 	move := ai.FindBestMove(b, *p)
 
-	play(b, p, move)
+	Play(b, p, move)
 	return nil
 }
 

@@ -42,13 +42,14 @@ func createTables() {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_owner_id INTEGER NOT NULL,
 		user_owner_shape INTEGER NOT NULL,
-		user_owner_turn_first BOOL NOT NULL,
+		current_turn INTEGER NOT NULL,
 		user_player_id INTEGER NOT NULL,
 		status STRING NOT NULL,
 		board BLOB NOT NULL,
 		date DATETIME NOT NULL,
 		FOREIGN KEY(user_owner_id) REFERENCES users(id),
-		FOREIGN KEY(user_player_id) REFERENCES users(id)
+		FOREIGN KEY(user_player_id) REFERENCES users(id),
+		FOREIGN KEY(current_turn) REFERENCES users(id)
 	);
 	`
 	_, err = DB.Exec(createGamesTables)
