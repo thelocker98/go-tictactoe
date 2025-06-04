@@ -1,102 +1,138 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Tic Tac Toe</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #board {
-      display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-template-rows: repeat(3, 100px);
-      gap: 5px;
-      margin-top: 20px;
-    }
-    .cell {
-      width: 100px;
-      height: 100px;
-      font-size: 2em;
-      text-align: center;
-      line-height: 100px;
-      background-color: #eee;
-      cursor: pointer;
-    }
-    #message {
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Tic Tac Toe</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #board {
+                display: grid;
+                grid-template-columns: repeat(3, 100px);
+                grid-template-rows: repeat(3, 100px);
+                gap: 5px;
+                margin-top: 20px;
+            }
+            .cell {
+                width: 100px;
+                height: 100px;
+                font-size: 2em;
+                text-align: center;
+                line-height: 100px;
+                background-color: #eee;
+                cursor: pointer;
+            }
+            #message {
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Tic Tac Toe</h1>
+        <div id="board"></div>
+        <div id="message"></div>
 
-<h1>Tic Tac Toe</h1>
-<div id="board"></div>
-<div id="message"></div>
+        <script>
+            const boardDiv = document.getElementById("board");
+            const messageDiv = document.getElementById("message");
 
-<script>
-  const board = Array(9).fill(0);
-  const shape = -1; // Human is X (-1), server is O (1)
+            let board = Array(9).fill(0);
+            let shape = 1;
+            let gameid = null;
+            let yourTurn = false;
 
-  const boardDiv = document.getElementById('board');
-  const messageDiv = document.getElementById('message');
+            function getGameIdFromUrl() {
+                const match = window.location.pathname.match(/\/game\/(\d+)/);
+                return match ? parseInt(match[1]) : null;
+            }
 
-  function renderBoard() {
-    boardDiv.innerHTML = '';
-    board.forEach((value, idx) => {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.textContent = value === -1 ? 'X' : value === 1 ? 'O' : '';
-      cell.onclick = () => playerMove(idx);
-      if (value !== 0) cell.style.pointerEvents = 'none';
-      boardDiv.appendChild(cell);
-    });
-  }
+            function loadGameLayout(id) {
+                fetch(`/gamelayout/${id}`)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        board = data.game.Board;
+                        shape = data.game.YourShape;
+                        yourTurn = data.game.YourTurn;
+                        gameid = id;
+                        renderBoard();
+                        checkGameState(data);
+                        if (!data.game.YourTurn && !data.game.Win) {
+                            messageDiv.textContent = "Waiting for opponent...";
+                        }
+                    })
+                    .catch((err) => {
+                        messageDiv.textContent = "Failed to load game layout.";
+                        console.error(err);
+                    });
+            }
 
-  function playerMove(index) {
-    if (board[index] !== 0) return;
+            function renderBoard() {
+                boardDiv.innerHTML = "";
+                board.forEach((value, idx) => {
+                    const cell = document.createElement("div");
+                    cell.className = "cell";
+                    cell.textContent =
+                        value === 1 ? "X" : value === -1 ? "O" : "";
+                    cell.onclick = () => playerMove(idx);
+                    if (value !== 0 || !yourTurn)
+                        cell.style.pointerEvents = "none";
+                    boardDiv.appendChild(cell);
+                });
+            }
 
-    board[index] = shape;
-    renderBoard();
-    sendBoard();
-  }
+            function playerMove(index) {
+                if (!yourTurn || board[index] !== 0) return;
+                yourTurn = false;
+                board[index] = shape;
+                renderBoard();
+                sendMove(index);
+            }
 
-  function sendBoard() {
-    fetch('/game', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ board, shape: 1 }) // Computer is shape 1 (O)
-    })
-    .then(res => res.json())
-    .then(data => {
-      board.splice(0, 9, ...data.board);
-      renderBoard();
-      checkGameState(data);
-    })
-    .catch(err => {
-      messageDiv.textContent = 'Error communicating with server.';
-      console.error(err);
-    });
-  }
+            function sendMove(index) {
+                fetch("/play", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ gameid, move: index }),
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        location.reload();
+                        checkGameState(data);
+                    })
+                    .catch((err) => {
+                        messageDiv.textContent =
+                            "Error communicating with server.";
+                        console.error(err);
+                    });
+            }
 
-  function checkGameState(data) {
-    if (data.win) {
-      if (data.winner === shape) {
-        messageDiv.textContent = 'You win!';
-      } else if (data.winner === 0) {
-        messageDiv.textContent = 'It\'s a tie!';
-      } else {
-        messageDiv.textContent = 'Computer wins!';
-      }
-      boardDiv.querySelectorAll('.cell').forEach(cell => cell.style.pointerEvents = 'none');
-    }
-  }
+            function checkGameState(data) {
+                if (data.game.Win) {
+                    if (data.game.Winner === shape) {
+                        messageDiv.textContent = "You won!";
+                    } else if (data.game.Winner === 0) {
+                        messageDiv.textContent = "It's a tie!";
+                    } else {
+                        messageDiv.textContent = "You lose!";
+                    }
+                    boardDiv.querySelectorAll(".cell").forEach((cell) => {
+                        cell.style.pointerEvents = "none";
+                    });
+                } else {
+                    yourTurn = true;
+                }
+            }
 
-  renderBoard();
-</script>
-
-</body>
+            const id = getGameIdFromUrl();
+            if (id !== null) {
+                loadGameLayout(id);
+            } else {
+                messageDiv.textContent = "Invalid game URL.";
+            }
+        </script>
+    </body>
 </html>

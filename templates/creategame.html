@@ -3,6 +3,11 @@
     <head>
         <title>Create Game</title>
         <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+            }
             body {
                 font-family: Arial, sans-serif;
                 background-color: #f9f9f9;
@@ -42,8 +47,9 @@
                 padding: 30px;
                 border-radius: 12px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                min-width: 300px;
                 max-width: 500px;
-                width: 100%;
+                width: 50%;
             }
 
             label {
@@ -52,8 +58,7 @@
                 font-weight: bold;
             }
 
-            input,
-            select {
+            .textbox {
                 width: 100%;
                 padding: 14px;
                 margin-bottom: 24px;
@@ -121,6 +126,7 @@
             <label for="opponentType">Opponent:</label>
             <select
                 id="opponentType"
+                class="textbox"
                 name="opponentType"
                 onchange="toggleOpponentInput()"
             >
@@ -131,6 +137,7 @@
             <input
                 type="text"
                 id="opponentInput"
+                class="textbox"
                 name="opponentInput"
                 placeholder="Start typing a name..."
                 autocomplete="off"
@@ -138,13 +145,13 @@
             <div id="suggestions" style="position: relative"></div>
 
             <label for="turnChoice">Who Goes First?</label>
-            <select name="firstTurn" id="turnChoice">
+            <select name="firstTurn" id="turnChoice" class="textbox">
                 <option value="opponent">Opponent</option>
                 <option value="me">Me</option>
             </select>
 
             <label for="symbolChoice">Choose Your Symbol:</label>
-            <select name="symbol" id="symbolChoice">
+            <select name="symbol" id="symbolChoice" class="textbox">
                 <option value="X">X</option>
                 <option value="O">O</option>
             </select>

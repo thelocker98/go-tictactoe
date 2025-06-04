@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"example.com/tictactoe/ai"
-	"example.com/tictactoe/board"
 	"example.com/tictactoe/models"
 	"example.com/tictactoe/play"
 	"example.com/tictactoe/player"
@@ -15,6 +13,21 @@ import (
 type webBoard struct {
 	Board []int64 `json:"board" binding:"required"`
 	Shape int64   `json:"shape" binding:"required"`
+}
+
+type webGame struct {
+	Board        [9]int64
+	YourUserName string
+	YourTurn     bool
+	YourShape    int64
+	Win          bool
+	Winner       int64
+}
+
+type webPlay struct {
+	Win    bool
+	Winner int64
+	Board  [9]int64
 }
 
 func playMove(context *gin.Context) {
@@ -44,9 +57,13 @@ func playMove(context *gin.Context) {
 
 	// make play
 	var shape string
-	if -game.UserOwnerShape == -1 {
+	shapeint := game.UserOwnerShape
+	if userId != game.UserOwnerId {
+		shapeint = shapeint * -1
+	}
+	if shapeint == -1 {
 		shape = "O"
-	} else if -game.UserOwnerShape == 1 {
+	} else if shapeint == 1 {
 		shape = "X"
 	}
 
@@ -75,7 +92,10 @@ func playMove(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusBadRequest, gin.H{"message": "successful play"})
+	var responsePlay webPlay
+	responsePlay.Win, responsePlay.Winner = game.Board.CheckWin()
+	responsePlay.Board = game.Board.Board
+	context.JSON(http.StatusOK, gin.H{"game": responsePlay})
 }
 
 func getBoardLayout(context *gin.Context) {
@@ -93,9 +113,27 @@ func getBoardLayout(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"board": game.Board})
+	user, _ := models.GetUserById(userId)
+	shape := game.UserOwnerShape
+	if userId != game.UserOwnerId {
+		shape = shape * -1
+	}
+	turn := false
+	if userId == game.CurrentTurn {
+		turn = true
+	}
+
+	webGame := webGame{
+		Board:        game.Board.Board,
+		YourUserName: user.UserName,
+		YourShape:    shape,
+		YourTurn:     turn,
+	}
+	webGame.Win, webGame.Winner = game.Board.CheckWin()
+	context.JSON(http.StatusOK, gin.H{"game": webGame})
 }
 
+/*
 func getBestMove(context *gin.Context) {
 	var p player.Player
 	var b board.Board
@@ -121,3 +159,4 @@ func getBestMove(context *gin.Context) {
 
 	context.JSON(http.StatusCreated, gin.H{"win": win, "winner": winner, "move": move, "board": b.Board})
 }
+*/

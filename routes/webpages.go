@@ -54,7 +54,11 @@ func loadHomePage(context *gin.Context) {
 		}
 
 		if win {
-			if winner == game.UserOwnerShape {
+			userShape := game.UserOwnerShape
+			if userId != game.UserOwnerId {
+				userShape = userShape * -1
+			}
+			if winner == userShape {
 				tempGame.Winner = "You Won! 😃"
 			} else if winner != 0 {
 				tempGame.Winner = "You Lost! 😥"

@@ -57,6 +57,7 @@ func login(context *gin.Context) {
 }
 
 func getAllUsers(context *gin.Context) {
+	userId := context.GetInt64("userId")
 	var webUsers []webUserList
 
 	users, err := models.GetAllUser()
@@ -70,8 +71,9 @@ func getAllUsers(context *gin.Context) {
 		tempuser.Id = user.ID
 		tempuser.Name = user.UserName
 
-		webUsers = append(webUsers, tempuser)
+		if userId != tempuser.Id {
+			webUsers = append(webUsers, tempuser)
+		}
 	}
-
 	context.JSON(http.StatusOK, gin.H{"users": webUsers})
 }
