@@ -124,7 +124,7 @@ func GetGameById(gameId int64) (*Game, error) {
 }
 
 func GetGameByUserId(userId int64) ([]Game, error) {
-	query := `SELECT * FROM games WHERE user_owner_id = ? or user_player_id = ?`
+	query := `SELECT * FROM games WHERE user_owner_id = ? or user_player_id = ? ORDER BY date DESC;`
 	rows, err := db.DB.Query(query, userId, userId)
 	if err != nil {
 		return nil, err

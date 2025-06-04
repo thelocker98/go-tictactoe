@@ -10,13 +10,14 @@ import (
 )
 
 type webView struct {
-	GameId          int64
-	UserOwnerName   string
-	CurrentTurn     string
-	UserPlayerName  string
-	UserPlayerShape string
-	Status          string
-	Winner          string
+	GameId           int64
+	UserOwnerName    string
+	CurrentTurn      string
+	UserOpponentName string
+	UserPlayerShape  string
+	Status           string
+	Winner           string
+	Time             string
 }
 
 func loadHomePage(context *gin.Context) {
@@ -43,8 +44,15 @@ func loadHomePage(context *gin.Context) {
 
 		var tempGame webView
 		tempGame.GameId = game.GameId
+
 		tempGame.UserOwnerName = owner.UserName
-		tempGame.UserPlayerName = player.UserName
+		if game.UserOwnerId == userId {
+			tempGame.UserOwnerName = "You"
+			tempGame.UserOpponentName = player.UserName
+		} else {
+			tempGame.UserOpponentName = owner.UserName
+		}
+
 		if game.Status == "PENDING" && game.UserOwnerId == userId {
 			tempGame.Status = "PENDING_OP"
 		} else if game.Status == "DENYED" && game.UserOwnerId != userId {
@@ -52,6 +60,14 @@ func loadHomePage(context *gin.Context) {
 		} else {
 			tempGame.Status = game.Status
 		}
+
+		if game.CurrentTurn == userId {
+			tempGame.CurrentTurn = "Your Turn"
+		} else {
+			tempGame.CurrentTurn = "Opponents Turn"
+		}
+
+		tempGame.Time = game.DateTime.Format("Jan 2 3:04 PM")
 
 		if win {
 			userShape := game.UserOwnerShape

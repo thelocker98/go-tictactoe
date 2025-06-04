@@ -66,16 +66,16 @@
         <h1>Active Games</h1>
         <table>
             <tr>
-                <th>You</th>
-                <th>Turn</th>
                 <th>Your Opponent</th>
+                <th>Turn</th>
+                <th>Time</th>
                 <th>Play</th>
             </tr>
             {{range .activegames}}
             <tr>
-                <td>{{.UserOwnerName}}</td>
+                <td>{{.UserOpponentName}}</td>
                 <td>{{.CurrentTurn}}</td>
-                <td>{{.UserPlayerName}}</td>
+                <td>{{.Time}}</td>
                 <td>
                     {{if eq .Status "PENDING"}}
                     <button onclick="handleAction('/accept/{{.GameId}}')">
@@ -106,14 +106,15 @@
         <h1>Past Games</h1>
         <table>
             <tr>
-                <th>You</th>
-                <th>Who Went First</th>
+                <th>Who Created the Game</th>
+                <th>Time</th>
                 <th>Winner</th>
+                <th>View Game</th>
             </tr>
             {{range .pastgames}}
             <tr>
                 <td>{{.UserOwnerName}}</td>
-                <td>{{.UserPlayerName}}</td>
+                <td>{{.Time}}</td>
                 <td>
                     {{if eq .Status "DENYED"}}
                     <button onclick="handleAction('/delete/{{.GameId}}')">
@@ -121,6 +122,11 @@
                     </button>
                     {{else if eq .Status "DENYED_OP"}} Declined {{else}}
                     {{.Winner}} {{end}}
+                </td>
+                <td>
+                    <button onclick="location.href='/game/{{.GameId}}'">
+                        View Finished Game
+                    </button>
                 </td>
             </tr>
             {{end}}
