@@ -3,6 +3,8 @@ package board
 import (
 	"fmt"
 	"math/rand"
+
+	"example.com/tictactoe/player"
 )
 
 type Board struct {
@@ -15,21 +17,13 @@ func NewBoard() Board {
 	}
 }
 
-func (b *Board) PrintBoard() {
-	for c := 0; c < 3; c++ {
-		fmt.Print("-------------\n")
-		for r := 0; r < 3; r++ {
-			loc := c*3 + r
-			if b.Board[loc] != 0 {
-				result := map[int64]string{-1: "O", 1: "X"}[b.Board[loc]]
-				fmt.Print("| ", result, " ")
-			} else {
-				fmt.Print("| ", loc, " ")
-			}
-		}
-		fmt.Print("|\n")
+func (b *Board) Play(p *player.Player, loc int64) error {
+	if b.Board[loc] == 0 {
+		b.Board[loc] = p.Shape
+		return nil
 	}
-	fmt.Print("-------------\n")
+
+	return fmt.Errorf("location %d is already taken", loc)
 }
 
 func (b *Board) CheckWin() (bool, int64) {
@@ -37,7 +31,7 @@ func (b *Board) CheckWin() (bool, int64) {
 	var winner int64 = 0
 
 	var i int64
-	for i = 0; i < 3; i++ {
+	for i = range 3 {
 		if b.Board[i*3] == b.Board[(i*3)+1] && b.Board[(i*3)+1] == b.Board[(i*3)+2] && b.Board[i*3] != 0 {
 			win = true
 			winner = b.Board[i*3]

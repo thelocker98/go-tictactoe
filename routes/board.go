@@ -7,7 +7,6 @@ import (
 
 	"example.com/tictactoe/ai"
 	"example.com/tictactoe/models"
-	"example.com/tictactoe/play"
 	"example.com/tictactoe/player"
 	"github.com/gin-gonic/gin"
 )
@@ -58,15 +57,9 @@ func playMove(context *gin.Context) {
 	}
 
 	// make play
-	var shape string
-	shapeint := game.UserOwnerShape
+	shape := game.UserOwnerShape
 	if userId != game.UserOwnerId {
-		shapeint = shapeint * -1
-	}
-	if shapeint == -1 {
-		shape = "O"
-	} else if shapeint == 1 {
-		shape = "X"
+		shape = shape * -1
 	}
 
 	playerNew, err := player.New(userDB.UserName, false, shape)
@@ -75,7 +68,7 @@ func playMove(context *gin.Context) {
 		return
 	}
 
-	err = play.Play(&game.Board, playerNew, *currentMove.Move)
+	err = game.Board.Play(playerNew, *currentMove.Move)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "invalid play"})
 		return

@@ -59,7 +59,7 @@ func createGame(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"gameId": newGame.GameId})
 }
 
-func acceptGame(context *gin.Context) {
+func userAcceptGame(context *gin.Context) {
 	userId := context.GetInt64("userId")
 
 	gameId, err1 := strconv.ParseInt(context.Param("id"), 10, 64)
@@ -90,7 +90,7 @@ func acceptGame(context *gin.Context) {
 	context.JSON(http.StatusBadRequest, gin.H{"message": "game is in the wrong state"})
 }
 
-func rejectGame(context *gin.Context) {
+func userRejectGame(context *gin.Context) {
 	userId := context.GetInt64("userId")
 
 	gameId, err1 := strconv.ParseInt(context.Param("id"), 10, 64)
@@ -122,7 +122,7 @@ func rejectGame(context *gin.Context) {
 	context.JSON(http.StatusBadRequest, gin.H{"message": "game is in the wrong state"})
 }
 
-func deleteGame(context *gin.Context) {
+func userDeleteGame(context *gin.Context) {
 	userId := context.GetInt64("userId")
 
 	gameId, err1 := strconv.ParseInt(context.Param("id"), 10, 64)

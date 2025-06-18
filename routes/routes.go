@@ -15,9 +15,9 @@ func RegisterRoutes(server *gin.Engine) {
 	authenticated.Use(middlewares.Authenticate)
 
 	authenticated.GET("/", loadHomePage)
-	authenticated.GET("/accept/:id", acceptGame)
-	authenticated.GET("/reject/:id", rejectGame)
-	authenticated.GET("/delete/:id", deleteGame)
+	authenticated.GET("/accept/:id", userAcceptGame)
+	authenticated.GET("/reject/:id", userRejectGame)
+	authenticated.GET("/delete/:id", userDeleteGame)
 
 	authenticated.GET("/creategame", createGamePage)
 	authenticated.POST("/creategame", createGame)
