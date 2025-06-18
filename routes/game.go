@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"example.com/tictactoe/ai"
 	"example.com/tictactoe/models"
 	"github.com/gin-gonic/gin"
 )
@@ -36,6 +37,23 @@ func createGame(context *gin.Context) {
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse"})
 		return
+	}
+
+	if newGame.UserPlayerId == 1 {
+		err := ai.ComputerGameAccept(newGame.GameId)
+		if err != nil {
+			context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse"}) // Computer failed to update game
+			return
+		}
+
+		// check if the it is the computers turn to go and if it is then it uses the ai to make the move
+		if newGame.CurrentTurn == 1 {
+			err = ai.ComputerPlayMove(newGame.GameId)
+			if err != nil {
+				context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse"}) // Computer failed to make a move
+				return
+			}
+		}
 	}
 
 	context.JSON(http.StatusOK, gin.H{"gameId": newGame.GameId})

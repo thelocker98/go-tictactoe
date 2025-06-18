@@ -1,9 +1,11 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
+	"example.com/tictactoe/ai"
 	"example.com/tictactoe/models"
 	"example.com/tictactoe/play"
 	"example.com/tictactoe/player"
@@ -92,6 +94,14 @@ func playMove(context *gin.Context) {
 		return
 	}
 
+	if game.CurrentTurn == 1 {
+		err = ai.ComputerPlayMove(game.GameId)
+		if err != nil {
+			context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse"}) // Computer failed to make a move
+			return
+		}
+	}
+
 	var responsePlay webPlay
 	responsePlay.Win, responsePlay.Winner = game.Board.CheckWin()
 	responsePlay.Board = game.Board.Board
@@ -108,6 +118,19 @@ func getBoardLayout(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "game does not exist"})
 		return
 	}
+
+	if game.CurrentTurn == 1 {
+		err := ai.ComputerPlayMove(game.GameId)
+		if err != nil {
+			context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse"}) // Computer failed to make a move
+			return
+		}
+
+		// Pull updated game
+		game, _ = models.GetGameById(gameId)
+		fmt.Print("game update", game)
+	}
+
 	if (userId != game.UserOwnerId && userId != game.UserPlayerId) || game.Status != "ACCEPTED" {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "do not have access to this game"})
 		return
@@ -132,31 +155,3 @@ func getBoardLayout(context *gin.Context) {
 	webGame.Win, webGame.Winner = game.Board.CheckWin()
 	context.JSON(http.StatusOK, gin.H{"game": webGame})
 }
-
-/*
-func getBestMove(context *gin.Context) {
-	var p player.Player
-	var b board.Board
-	var webBoard webBoard
-
-	err := context.ShouldBindJSON(&webBoard)
-
-	if err != nil || len(webBoard.Board) != 9 {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse board"})
-		return
-	}
-
-	p.Shape = int64(webBoard.Shape)
-	b.Board = [9]int64(webBoard.Board)
-
-	move := ai.FindBestMove(&b, p)
-
-	if move != -1 {
-		b.Board[move] = p.Shape
-	}
-
-	win, winner := b.CheckWin()
-
-	context.JSON(http.StatusCreated, gin.H{"win": win, "winner": winner, "move": move, "board": b.Board})
-}
-*/

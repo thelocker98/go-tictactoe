@@ -107,14 +107,13 @@
         <table>
             <tr>
                 <th>Who Created the Game</th>
-                <th>Time</th>
                 <th>Winner</th>
+                <th>Time</th>
                 <th>View Game</th>
             </tr>
             {{range .pastgames}}
             <tr>
                 <td>{{.UserOwnerName}}</td>
-                <td>{{.Time}}</td>
                 <td>
                     {{if eq .Status "DENYED"}}
                     <button onclick="handleAction('/delete/{{.GameId}}')">
@@ -123,9 +122,10 @@
                     {{else if eq .Status "DENYED_OP"}} Declined {{else}}
                     {{.Winner}} {{end}}
                 </td>
+                <td>{{.Time}}</td>
                 <td>
                     <button onclick="location.href='/game/{{.GameId}}'">
-                        View Finished Game
+                        View Game
                     </button>
                 </td>
             </tr>
