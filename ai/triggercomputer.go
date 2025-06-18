@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"example.com/tictactoe/models"
-	"example.com/tictactoe/player"
 )
 
 func ComputerGameAccept(gameId int64) error {
@@ -33,7 +32,6 @@ func ComputerGameAccept(gameId int64) error {
 func ComputerPlayMove(gameId int64) error {
 	// Get game using ID
 	game, err := models.GetGameById(gameId)
-	var p player.Player
 
 	// Check it is computers turn and make sure their was no error getting the game by id
 	if game.CurrentTurn != 1 || err != nil {
@@ -47,12 +45,12 @@ func ComputerPlayMove(gameId int64) error {
 	}
 
 	// create the computer player struct and then find the best move
-	p.Shape = game.UserOwnerShape * -1
-	move := FindBestMove(&game.Board, p)
+	computerShape := game.UserOwnerShape * -1
+	move := FindBestMove(&game.Board, computerShape)
 
 	// verify that the move is not an error and then update the game with the new move
 	if move != -1 {
-		game.Board.Board[move] = p.Shape
+		game.Board.Board[move] = computerShape
 
 		game.CurrentTurn = game.UserOwnerId
 

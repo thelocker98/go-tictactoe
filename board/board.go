@@ -3,8 +3,6 @@ package board
 import (
 	"fmt"
 	"math/rand"
-
-	"example.com/tictactoe/player"
 )
 
 type Board struct {
@@ -17,9 +15,9 @@ func NewBoard() Board {
 	}
 }
 
-func (b *Board) Play(p *player.Player, loc int64) error {
+func (b *Board) Play(shape int64, loc int64) error {
 	if b.Board[loc] == 0 {
-		b.Board[loc] = p.Shape
+		b.Board[loc] = shape
 		return nil
 	}
 

@@ -7,7 +7,6 @@ import (
 
 	"example.com/tictactoe/ai"
 	"example.com/tictactoe/models"
-	"example.com/tictactoe/player"
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,11 +39,10 @@ func playMove(context *gin.Context) {
 
 	userId := context.GetInt64("userId")
 	err1 := context.ShouldBindJSON(&currentMove)
-	userDB, err2 := models.GetUserById(userId)
 
 	game, err3 := models.GetGameById(currentMove.GameId)
 
-	if err1 != nil || err2 != nil || err3 != nil || !(*currentMove.Move >= 0 && *currentMove.Move <= 8) {
+	if err1 != nil || err3 != nil || !(*currentMove.Move >= 0 && *currentMove.Move <= 8) {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse value"})
 		return
 	}
@@ -62,13 +60,7 @@ func playMove(context *gin.Context) {
 		shape = shape * -1
 	}
 
-	playerNew, err := player.New(userDB.UserName, false, shape)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not create user"})
-		return
-	}
-
-	err = game.Board.Play(playerNew, *currentMove.Move)
+	err := game.Board.Play(shape, *currentMove.Move)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "invalid play"})
 		return
