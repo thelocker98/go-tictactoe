@@ -117,7 +117,7 @@ func loadGamePage(context *gin.Context) {
 		return
 	}
 
-	context.HTML(http.StatusOK, "game.html", gin.H{})
+	context.HTML(http.StatusOK, "gamews.html", gin.H{})
 }
 
 func loadLoginPage(context *gin.Context) {

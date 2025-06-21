@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Tic Tac Toe WS</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #board {
+                display: grid;
+                grid-template-columns: repeat(3, 100px);
+                grid-template-rows: repeat(3, 100px);
+                gap: 5px;
+                margin-top: 20px;
+            }
+            .cell {
+                width: 100px;
+                height: 100px;
+                font-size: 2em;
+                text-align: center;
+                line-height: 100px;
+                background-color: #eee;
+                cursor: pointer;
+            }
+            #message {
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Tic Tac Toe WS</h1>
+        <div id="board"></div>
+        <div id="message"></div>
+
+        <script>
+            const boardDiv = document.getElementById("board");
+            const messageDiv = document.getElementById("message");
+
+            //let board = Array(9).fill(0);
+            //let shape = 1;
+            //let yourTurn = false;
+            let socket = null;
+
+            function getGameIdFromUrl() {
+                const match = window.location.pathname.match(/\/game\/(\d+)/);
+                return match ? parseInt(match[1]) : null;
+            }
+
+            const gameid = getGameIdFromUrl();
+            connectWebSocket(gameid);
+
+            function renderBoard(data) {
+                let board = Array(9).fill(0);
+                board = data.board;
+                boardDiv.innerHTML = "";
+
+                console.log(data);
+                board.forEach((value, idx) => {
+                    const cell = document.createElement("div");
+                    cell.className = "cell";
+                    cell.textContent =
+                        value === 1 ? "X" : value === -1 ? "O" : "";
+
+                    // Only enable clicks when it's your turn and the cell is empty
+                    if (data.yourTurn && value === 0) {
+                        cell.addEventListener("click", () => sendMove(idx));
+                    } else {
+                        cell.style.pointerEvents = "none";
+                    }
+
+                    console.log(value, idx, data.yourTurn);
+                    boardDiv.appendChild(cell);
+                });
+            }
+
+            function sendMove(index) {
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ gameid, move: index }));
+                } else {
+                    messageDiv.textContent = "WebSocket not connected.";
+                }
+            }
+
+            function checkGameState(data) {
+                if (data.Win) {
+                    if (data.Winner === shape) {
+                        messageDiv.textContent = "You won!";
+                    } else if (data.Winner === 0) {
+                        messageDiv.textContent = "It's a tie!";
+                    } else {
+                        messageDiv.textContent = "You lose!";
+                    }
+                    boardDiv.querySelectorAll(".cell").forEach((cell) => {
+                        cell.style.pointerEvents = "none";
+                    });
+                }
+            }
+
+            function connectWebSocket(id) {
+                socket = new WebSocket(`ws://${location.host}/gamelayout/ws`);
+
+                socket.onopen = () => {
+                    console.log("WebSocket connection opened.");
+                    const message = {
+                        gameId: id,
+                    };
+                    socket.send(JSON.stringify(message));
+                };
+
+                socket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    yourTurn = data.yourTurn;
+                    renderBoard(data);
+                    checkGameState(data);
+                    if (!yourTurn && !data.Win) {
+                        messageDiv.textContent = "Waiting for opponent...";
+                    } else {
+                        messageDiv.textContent = "Your Turn";
+                    }
+                };
+
+                socket.onerror = (err) => {
+                    console.error("WebSocket error", err);
+                    messageDiv.textContent = "WebSocket error.";
+                };
+
+                socket.onclose = () => {
+                    console.log("WebSocket connection closed.");
+                    messageDiv.textContent = "Disconnected from server.";
+                };
+            }
+        </script>
+    </body>
+</html>

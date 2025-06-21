@@ -3,7 +3,6 @@ package routes
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"example.com/tictactoe/ai"
 	"example.com/tictactoe/models"
@@ -16,12 +15,12 @@ type webBoard struct {
 }
 
 type webGame struct {
-	Board        [9]int64
-	YourUserName string
-	YourTurn     bool
-	YourShape    int64
-	Win          bool
-	Winner       int64
+	Board        [9]int64 `json:"board"`
+	YourUserName string   `json:"player"`
+	YourTurn     bool     `json:"yourTurn"`
+	YourShape    int64    `json:"yourShape"`
+	Win          bool     `json:"win"`
+	Winner       int64    `json:"winner"`
 }
 
 type webPlay struct {
@@ -93,22 +92,17 @@ func playMove(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"game": responsePlay})
 }
 
-func getBoardLayout(context *gin.Context) {
-	userId := context.GetInt64("userId")
+func getBoardLayout(userId int64, gameId int64) (webGame, error) {
+	game, err := models.GetGameById(gameId)
 
-	gameId, err1 := strconv.ParseInt(context.Param("id"), 10, 64)
-	game, err2 := models.GetGameById(gameId)
-
-	if err1 != nil || err2 != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "game does not exist"})
-		return
+	if err != nil {
+		return webGame{}, err
 	}
 
 	if game.CurrentTurn == 1 {
 		err := ai.ComputerPlayMove(game.GameId)
 		if err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse"}) // Computer failed to make a move
-			return
+			return webGame{}, err
 		}
 
 		// Pull updated game
@@ -117,8 +111,7 @@ func getBoardLayout(context *gin.Context) {
 	}
 
 	if (userId != game.UserOwnerId && userId != game.UserPlayerId) || game.Status != "ACCEPTED" {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "do not have access to this game"})
-		return
+		return webGame{}, err
 	}
 
 	user, _ := models.GetUserById(userId)
@@ -138,5 +131,6 @@ func getBoardLayout(context *gin.Context) {
 		YourTurn:     turn,
 	}
 	webGame.Win, webGame.Winner = game.Board.CheckWin()
-	context.JSON(http.StatusOK, gin.H{"game": webGame})
+
+	return webGame, nil
 }
