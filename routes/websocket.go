@@ -40,13 +40,23 @@ func getBoardLayoutWS(w http.ResponseWriter, r *http.Request, userId int64) {
 	}
 
 	// ensure connection is closed when done
-	defer conn.Close()
+	defer func() {
+		delete(clients, conn)
+		conn.Close()
+	}()
+
+	// Pingpong to checkif defices is on
+	conn.SetPongHandler(func(appData string) error {
+		fmt.Println("pong received")
+		return nil
+	})
 
 	// for message recived from browser
 	for {
 		// read message
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
+			delete(clients, conn)
 			fmt.Println("Read error:", err)
 			break
 		}
@@ -59,8 +69,6 @@ func getBoardLayoutWS(w http.ResponseWriter, r *http.Request, userId int64) {
 			fmt.Println("error")
 		}
 
-		// Print username of client
-		fmt.Println("User ID", userId)
 		// add device to client list
 		clients[conn] = ClientData{GameId: GameIDData.GameId, UserId: userId}
 

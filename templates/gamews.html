@@ -59,6 +59,15 @@
             const boardDiv = document.getElementById("board");
             const messageDiv = document.getElementById("message");
 
+            let webGame = {
+              board: Array(9).fill(0),   // array of 9 integers
+              userId: 0,                 // integer (can be BigInt if needed)
+              userTurn: false,           // boolean
+              userShape: 0,              // integer
+              userWin: false,            // boolean
+              userWinner: 0              // integer
+            };
+
             let socket = null;
 
             function getGameIdFromUrl() {
@@ -69,12 +78,61 @@
             const gameid = getGameIdFromUrl();
             connectWebSocket(gameid);
 
-            function renderBoard(data) {
+
+            function connectWebSocket(id) {
+                socket = new WebSocket(`ws://${location.host}/gamelayout/ws`);
+
+                socket.onopen = () => {
+                    console.log("WebSocket connection opened.");
+                    const message = {
+                        gameId: id,
+                        move: -1,
+                    };
+                    socket.send(JSON.stringify(message));
+                };
+
+                socket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    webGame.board = data.board
+                    webGame.userId = userid
+                    webGame.userWin = data.userWin
+                    webGame.userWinner = data.userWinner
+                    if (userid == data.userId)
+                    {
+                      webGame.userTurn = data.userTurn
+                      webGame.userShape = data.userShape
+                    }
+                    else{
+                      webGame.userTurn = !data.userTurn
+                      webGame.userShape = -data.userShape
+                    }
+                    renderBoard(webGame);
+
+                    if (!webGame.userTurn && !webGame.userWinner) {
+                        messageDiv.textContent = "Waiting for opponent...";
+                    } else if (webGame.userWin) {
+                        displayGameWin(webGame);
+                    } else {
+                        messageDiv.textContent = "Your Turn";
+                    }
+                };
+
+                socket.onerror = (err) => {
+                    console.error("WebSocket error", err);
+                    messageDiv.textContent = "WebSocket error.";
+                };
+
+                socket.onclose = () => {
+                    console.log("WebSocket connection closed.");
+                    messageDiv.textContent = "Disconnected from server.";
+                };
+            }
+
+            function renderBoard(webGame) {
                 let board = Array(9).fill(0);
-                board = data.board;
+                board = webGame.board;
                 boardDiv.innerHTML = "";
 
-                console.log(data);
                 board.forEach((value, idx) => {
                     const cell = document.createElement("div");
                     cell.className = "cell";
@@ -82,7 +140,7 @@
                         value === 1 ? "X" : value === -1 ? "O" : "";
 
                     // Only enable clicks when it's your turn and the cell is empty
-                    if (data.yourTurn && value === 0) {
+                    if (webGame.userTurn && value === 0) {
                         cell.addEventListener("click", () => sendMove(idx));
                     } else {
                         cell.style.pointerEvents = "none";
@@ -100,11 +158,11 @@
                 }
             }
 
-            function displayGameWin(data) {
-                if (data.win) {
-                    if (data.winner === data.yourShape) {
+            function displayGameWin(webGame) {
+                if (webGame.userWin) {
+                    if (webGame.userWinner === webGame.userShape) {
                         messageDiv.textContent = "You won!";
-                    } else if (data.winner === 0) {
+                    } else if (webGame.userWinner === 0) {
                         messageDiv.textContent = "It's a tie!";
                     } else {
                         messageDiv.textContent = "You lose!";
@@ -113,43 +171,6 @@
                         cell.style.pointerEvents = "none";
                     });
                 }
-            }
-
-            function connectWebSocket(id) {
-                socket = new WebSocket(`ws://${location.host}/gamelayout/ws`);
-
-                socket.onopen = () => {
-                    console.log("WebSocket connection opened.");
-                    const message = {
-                        gameId: id,
-                        move: -1,
-                    };
-                    socket.send(JSON.stringify(message));
-                };
-
-                socket.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    yourTurn = data.yourTurn;
-                    renderBoard(data);
-
-                    if (!yourTurn && !data.win) {
-                        messageDiv.textContent = "Waiting for opponent...";
-                    } else if (data.win) {
-                        displayGameWin(data);
-                    } else {
-                        messageDiv.textContent = "Your Turn";
-                    }
-                };
-
-                socket.onerror = (err) => {
-                    console.error("WebSocket error", err);
-                    messageDiv.textContent = "WebSocket error.";
-                };
-
-                socket.onclose = () => {
-                    console.log("WebSocket connection closed.");
-                    messageDiv.textContent = "Disconnected from server.";
-                };
             }
         </script>
     </body>

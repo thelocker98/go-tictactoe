@@ -9,12 +9,12 @@ import (
 )
 
 type webGame struct {
-	Board        [9]int64 `json:"board"`
-	YourUserName string   `json:"player"`
-	YourTurn     bool     `json:"yourTurn"`
-	YourShape    int64    `json:"yourShape"`
-	Win          bool     `json:"win"`
-	Winner       int64    `json:"winner"`
+	Board  [9]int64 `json:"board"`
+	User   int64    `json:"userId"`
+	Turn   bool     `json:"userTurn"`
+	Shape  int64    `json:"userShape"`
+	Win    bool     `json:"userWin"`
+	Winner int64    `json:"userWinner"`
 }
 
 func getBoardLayout(userId int64, gameId int64) (webGame, error) {
@@ -32,14 +32,12 @@ func getBoardLayout(userId int64, gameId int64) (webGame, error) {
 
 		// Pull updated game
 		game, _ = models.GetGameById(gameId)
-		fmt.Print("game update", game)
 	}
 
 	if (userId != game.UserOwnerId && userId != game.UserPlayerId) || game.Status != "ACCEPTED" {
 		return webGame{}, err
 	}
 
-	user, _ := models.GetUserById(userId)
 	shape := game.UserOwnerShape
 	if userId != game.UserOwnerId {
 		shape = shape * -1
@@ -50,10 +48,10 @@ func getBoardLayout(userId int64, gameId int64) (webGame, error) {
 	}
 
 	webGame := webGame{
-		Board:        game.Board.Board,
-		YourUserName: user.UserName,
-		YourShape:    shape,
-		YourTurn:     turn,
+		Board: game.Board.Board,
+		User:  userId,
+		Shape: shape,
+		Turn:  turn,
 	}
 	webGame.Win, webGame.Winner = game.Board.CheckWin()
 
@@ -61,9 +59,6 @@ func getBoardLayout(userId int64, gameId int64) (webGame, error) {
 }
 
 func playMove(userId int64, WSgamedata WSdataIn) (webGame, error) {
-
-	//userId := context.GetInt64("userId")
-
 	game, err := models.GetGameById(WSgamedata.GameId)
 
 	if err != nil || !(WSgamedata.Move >= 0 && WSgamedata.Move <= 8) {
@@ -99,16 +94,25 @@ func playMove(userId int64, WSgamedata WSdataIn) (webGame, error) {
 		return webGame{}, errors.New(fmt.Sprint("error updating game", err))
 	}
 
+	turn := false
 	if game.CurrentTurn == 1 {
 		err = ai.ComputerPlayMove(game.GameId)
 		if err != nil {
 			return webGame{}, errors.New(fmt.Sprint("could not parse", err))
 		}
+		turn = true
+		game, _ = models.GetGameById(game.GameId)
 	}
 
-	var responsePlay webGame
-	responsePlay.Win, responsePlay.Winner = game.Board.CheckWin()
-	responsePlay.Board = game.Board.Board
+	win, winner := game.Board.CheckWin()
+	responsePlay := webGame{
+		Board:  game.Board.Board,
+		User:   userId,
+		Turn:   turn,
+		Shape:  shape,
+		Win:    win,
+		Winner: winner,
+	}
 
 	return responsePlay, nil
 }
