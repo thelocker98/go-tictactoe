@@ -26,9 +26,10 @@ func RegisterRoutes(server *gin.Engine) {
 	authenticated.GET("/game/:id", loadGamePage)
 	//authenticated.GET("/gamelayout/:id", getBoardLayout)
 	authenticated.GET("/gamelayout/ws", func(c *gin.Context) {
-		getBoardLayoutWS(c.Writer, c.Request)
+		userId := c.GetInt64("userId")
+		getBoardLayoutWS(c.Writer, c.Request, userId)
 	})
-	authenticated.POST("/play", playMove)
+	//authenticated.POST("/play", playMove)
 
 	authenticated.GET("/logout", logout)
 }

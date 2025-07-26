@@ -10,6 +10,20 @@
                 flex-direction: column;
                 align-items: center;
             }
+            #home-button {
+                margin-top: 10px;
+                margin-bottom: 10px;
+                padding: 10px 20px;
+                font-size: 1em;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            #home-button:hover {
+                background-color: #0056b3;
+            }
             #board {
                 display: grid;
                 grid-template-columns: repeat(3, 100px);
@@ -33,6 +47,10 @@
     </head>
     <body>
         <h1>Tic Tac Toe WS</h1>
+        <button id="home-button" onclick="window.location.href='/'">
+            Home
+        </button>
+
         <div id="board"></div>
         <div id="message"></div>
 
@@ -40,9 +58,6 @@
             const boardDiv = document.getElementById("board");
             const messageDiv = document.getElementById("message");
 
-            //let board = Array(9).fill(0);
-            //let shape = 1;
-            //let yourTurn = false;
             let socket = null;
 
             function getGameIdFromUrl() {
@@ -72,7 +87,6 @@
                         cell.style.pointerEvents = "none";
                     }
 
-                    console.log(value, idx, data.yourTurn);
                     boardDiv.appendChild(cell);
                 });
             }
@@ -85,11 +99,11 @@
                 }
             }
 
-            function checkGameState(data) {
-                if (data.Win) {
-                    if (data.Winner === shape) {
+            function displayGameWin(data) {
+                if (data.win) {
+                    if (data.winner === data.yourShape) {
                         messageDiv.textContent = "You won!";
-                    } else if (data.Winner === 0) {
+                    } else if (data.winner === 0) {
                         messageDiv.textContent = "It's a tie!";
                     } else {
                         messageDiv.textContent = "You lose!";
@@ -107,6 +121,7 @@
                     console.log("WebSocket connection opened.");
                     const message = {
                         gameId: id,
+                        move: -1,
                     };
                     socket.send(JSON.stringify(message));
                 };
@@ -115,9 +130,11 @@
                     const data = JSON.parse(event.data);
                     yourTurn = data.yourTurn;
                     renderBoard(data);
-                    checkGameState(data);
-                    if (!yourTurn && !data.Win) {
+
+                    if (!yourTurn && !data.win) {
                         messageDiv.textContent = "Waiting for opponent...";
+                    } else if (data.win) {
+                        displayGameWin(data);
                     } else {
                         messageDiv.textContent = "Your Turn";
                     }
