@@ -8,19 +8,28 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// Websocket game data
 type WSdataIn struct {
 	GameId int64 `json:"gameId"`
 	Move   int64 `json:"move"`
 }
 
+// Websocket data
 var data []byte
 
+// Websocket Upgrader
 var wsupgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }
 
-var clients = make(map[*websocket.Conn]int64) // Track active clients
+// Websocket client list
+type ClientData struct {
+	GameId int64 `json:"gameId"`
+	UserId int64 `json:"userId"`
+}
+
+var clients = make(map[*websocket.Conn]ClientData) // Track active clients
 
 func getBoardLayoutWS(w http.ResponseWriter, r *http.Request, userId int64) {
 	// Setup and upgrade websocket
@@ -53,43 +62,41 @@ func getBoardLayoutWS(w http.ResponseWriter, r *http.Request, userId int64) {
 		// Print username of client
 		fmt.Println("User ID", userId)
 		// add device to client list
-		clients[conn] = GameIDData.GameId
+		clients[conn] = ClientData{GameId: GameIDData.GameId, UserId: userId}
 
 		// Check if it is a valid move or if it is a request for games state.
 		// -1 means it is a request for game state
+		var webGameData webGame
+
 		if GameIDData.Move == -1 {
 			// get current game state from database
-			webGameData, err1 := getBoardLayout(userId, GameIDData.GameId)
+			webGameData, err = getBoardLayout(userId, GameIDData.GameId)
+			if err != nil {
 
-			var err2 error
-			data, err2 = json.Marshal(webGameData)
-			// check for errors in both commands
-			if err1 != nil && err2 != nil {
-				fmt.Println("Marshal error:", err)
-				return
 			}
-
-			// print out data that will be sent
-			fmt.Println(webGameData)
 		} else {
 			// Print out move
 			fmt.Println("Move", GameIDData.Move)
 			// Play move
-			webGameData, err1 := playMove(userId, GameIDData)
+			webGameData, err = playMove(userId, GameIDData)
+		}
+		// Check for database errors
+		if err != nil {
+			fmt.Println("db error:", err)
+			return
+		}
 
-			// check to see if it was a valid move
-			var err2 error
-			data, err2 = json.Marshal(webGameData)
-			if err1 != nil && err2 != nil {
-				fmt.Println("Marshal error:", err)
-				return
-			}
+		// convert struct to json and check for errors
+		data, err = json.Marshal(webGameData)
+		if err != nil {
+			fmt.Println("Marshal error:", err)
+			return
 		}
 
 		// Broadcast message to all clients
 		fmt.Println(clients)
 		for client, val := range clients {
-			if val == GameIDData.GameId {
+			if val.GameId == GameIDData.GameId {
 				if err := client.WriteMessage(websocket.TextMessage, data); err != nil {
 					fmt.Println("broadcast error:", err)
 					client.Close()

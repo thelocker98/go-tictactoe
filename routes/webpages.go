@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -116,8 +117,10 @@ func loadGamePage(context *gin.Context) {
 		context.HTML(http.StatusOK, "error.html", gin.H{"ErrorMessage": "This Game is Pending. Please wait for your opponent to accept your game invitation"})
 		return
 	}
-
-	context.HTML(http.StatusOK, "gamews.html", gin.H{})
+	fmt.Println(userId)
+	context.HTML(http.StatusOK, "gamews.html", gin.H{
+		"userId": userId,
+	})
 }
 
 func loadLoginPage(context *gin.Context) {
