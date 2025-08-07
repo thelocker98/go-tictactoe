@@ -2,7 +2,6 @@ package routes
 
 import (
 	"net/http"
-	"strconv"
 
 	"example.com/tictactoe/ai"
 	"example.com/tictactoe/models"
@@ -13,6 +12,29 @@ type webCreateGame struct {
 	Opponent     int64 `json:"opponent" binding:"required"`
 	Creatorfirst *bool `json:"creator_first" binding:"required"`
 	Shape        int64 `json:"shape" binding:"required"`
+}
+
+type webView struct {
+	GameId           int64  `json:"gameId"`
+	UserOwnerName    string `json:"userOwnerName"`
+	CurrentTurn      string `json:"currentTurn"`
+	UserOpponentName string `json:"userOpponentName"`
+	UserPlayerShape  string `json:"userPlayerShape"`
+	Status           string `json:"status"`
+	Win              bool   `json:"win"`
+	Winner           string `json:"winner"`
+	Time             string `json:"time"`
+}
+
+type homePageData struct {
+	GameId           int64  `json:"gameId"`
+	UserOwnerName    string `json:"userOwnerName"`
+	UserOpponentName string `json:"userOpponentName"`
+	UserPlayerShape  string `json:"userPlayerShape"`
+	CurrentTurn      string `json:"currentTurn"`
+	Win              bool   `json:"win"`
+	Winner           string `json:"winner"`
+	Time             string `json:"time"`
 }
 
 func createGame(context *gin.Context) {
@@ -59,50 +81,36 @@ func createGame(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"gameId": newGame.GameId})
 }
 
-func userAcceptGame(context *gin.Context) {
-	userId := context.GetInt64("userId")
+func userAcceptGame(data HomeWSin) {
+	game, err := models.GetGameById(data.GameId)
 
-	gameId, err1 := strconv.ParseInt(context.Param("id"), 10, 64)
-	game, err2 := models.GetGameById(gameId)
-
-	if err1 != nil || err2 != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "game does not exist"})
+	if err != nil {
 		return
 	}
 
-	if game.UserPlayerId != userId {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "you do not have permission to access this game"})
+	if game.UserPlayerId != data.UserId {
 		return
 	}
+
 	if game.Status == "PENDING" {
 		game.Status = "ACCEPTED"
 
 		err := models.UpdateGame(game)
 		if err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{"message": "error writing database"})
 			return
 		}
-
-		context.JSON(http.StatusOK, gin.H{"message": "Game Accept Successfuly"})
 		return
 	}
-
-	context.JSON(http.StatusBadRequest, gin.H{"message": "game is in the wrong state"})
 }
 
-func userRejectGame(context *gin.Context) {
-	userId := context.GetInt64("userId")
+func userRejectGame(data HomeWSin) {
+	game, err := models.GetGameById(data.GameId)
 
-	gameId, err1 := strconv.ParseInt(context.Param("id"), 10, 64)
-	game, err2 := models.GetGameById(gameId)
-
-	if err1 != nil || err2 != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "game does not exist"})
+	if err != nil {
 		return
 	}
 
-	if game.UserPlayerId != userId {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "you do not have permission to access this game"})
+	if game.UserPlayerId != data.UserId {
 		return
 	}
 	if game.Status == "PENDING" {
@@ -111,30 +119,20 @@ func userRejectGame(context *gin.Context) {
 		err := models.UpdateGame(game)
 
 		if err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{"message": "error writing database"})
 			return
 		}
-
-		context.JSON(http.StatusOK, gin.H{"message": "Game Rejected Successfuly"})
 		return
 	}
-
-	context.JSON(http.StatusBadRequest, gin.H{"message": "game is in the wrong state"})
 }
 
-func userDeleteGame(context *gin.Context) {
-	userId := context.GetInt64("userId")
+func userDeleteGame(data HomeWSin) {
+	game, err := models.GetGameById(data.GameId)
 
-	gameId, err1 := strconv.ParseInt(context.Param("id"), 10, 64)
-	game, err2 := models.GetGameById(gameId)
-
-	if err1 != nil || err2 != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "game does not exist"})
+	if err != nil {
 		return
 	}
 
-	if game.UserOwnerId != userId {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "you do not have permission to access this game"})
+	if game.UserOwnerId != data.UserId {
 		return
 	}
 	if game.Status == "DENYED" || game.Status == "PENDING" {
@@ -142,13 +140,80 @@ func userDeleteGame(context *gin.Context) {
 		err := models.DeleteGame(game)
 
 		if err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{"message": "error writing database"})
 			return
 		}
-
-		context.JSON(http.StatusOK, gin.H{"message": "Game Deleted Successfuly"})
 		return
 	}
+}
 
-	context.JSON(http.StatusBadRequest, gin.H{"message": "game is in the wrong state"})
+func loadHomepageData(userId int64) []webView {
+	// Setup variables for active and past games
+	var gameList []webView
+	var tempGame webView
+
+	// Get UserId
+	games, err := models.GetGameByUserId(userId)
+	if err != nil {
+		return nil
+	}
+
+	for _, game := range games {
+		win, winner := game.Board.CheckWin()
+
+		tempGame.GameId = game.GameId
+
+		if game.UserOwnerId == userId {
+			tempGame.UserOwnerName = "You"
+			player, err := models.GetUserById(game.UserPlayerId)
+			if err != nil {
+				continue
+			}
+			tempGame.UserOpponentName = player.UserName
+		} else {
+			tempGame.UserOpponentName = "You"
+			owner, err := models.GetUserById(game.UserPlayerId)
+			if err != nil {
+				continue
+			}
+			tempGame.UserOwnerName = owner.UserName
+		}
+
+		if game.Status == "PENDING" && game.UserOwnerId == userId {
+			tempGame.Status = "PENDING_OP"
+		} else if game.Status == "DENYED" && game.UserOwnerId != userId {
+			tempGame.Status = "DENYED_OP"
+		} else {
+			tempGame.Status = game.Status
+		}
+
+		if game.CurrentTurn == userId {
+			tempGame.CurrentTurn = "Your Turn"
+		} else {
+			tempGame.CurrentTurn = "Opponents Turn"
+		}
+
+		tempGame.Time = game.DateTime.Format("Jan 2 3:04 PM")
+
+		if win || tempGame.Status == "DENYED" || tempGame.Status == "DENYED_OP" {
+			userShape := game.UserOwnerShape
+			if userId != game.UserOwnerId {
+				userShape = userShape * -1
+			}
+			if !win {
+
+			} else if winner == userShape {
+				tempGame.Winner = "You Won! 😃"
+			} else if winner != 0 {
+				tempGame.Winner = "You Lost! 😥"
+			} else {
+				tempGame.Winner = "You Tied! 🤝"
+			}
+
+			tempGame.Win = true
+		} else {
+			tempGame.Win = false
+		}
+		gameList = append(gameList, tempGame)
+	}
+	return gameList
 }

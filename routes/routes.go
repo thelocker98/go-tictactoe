@@ -15,9 +15,9 @@ func RegisterRoutes(server *gin.Engine) {
 	authenticated.Use(middlewares.Authenticate)
 
 	authenticated.GET("/", loadHomePage)
-	authenticated.GET("/accept/:id", userAcceptGame)
-	authenticated.GET("/reject/:id", userRejectGame)
-	authenticated.GET("/delete/:id", userDeleteGame)
+	//	authenticated.GET("/accept/:id", userAcceptGame)
+	//	authenticated.GET("/reject/:id", userRejectGame)
+	//	authenticated.GET("/delete/:id", userDeleteGame)
 
 	authenticated.GET("/creategame", createGamePage)
 	authenticated.POST("/creategame", createGame)
@@ -27,7 +27,12 @@ func RegisterRoutes(server *gin.Engine) {
 	//authenticated.GET("/gamelayout/:id", getBoardLayout)
 	authenticated.GET("/gamelayout/ws", func(c *gin.Context) {
 		userId := c.GetInt64("userId")
-		getBoardLayoutWS(c.Writer, c.Request, userId)
+		gameBoardWS(c.Writer, c.Request, userId)
+	})
+
+	authenticated.GET("/ws", func(c *gin.Context) {
+		userId := c.GetInt64("userId")
+		homePageWS(c.Writer, c.Request, userId)
 	})
 	//authenticated.POST("/play", playMove)
 

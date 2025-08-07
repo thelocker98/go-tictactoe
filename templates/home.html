@@ -64,75 +64,166 @@
         <button onclick="location.href='/creategame'">New Game</button>
 
         <h1>Active Games</h1>
-        <table>
+        <table id="activeGameTable">
             <tr>
                 <th>Your Opponent</th>
                 <th>Turn</th>
                 <th>Time</th>
                 <th>Play</th>
             </tr>
-            {{range .activegames}}
-            <tr>
-                <td>{{.UserOpponentName}}</td>
-                <td>{{.CurrentTurn}}</td>
-                <td>{{.Time}}</td>
-                <td>
-                    {{if eq .Status "PENDING"}}
-                    <button onclick="handleAction('/accept/{{.GameId}}')">
-                        Accept
-                    </button>
-                    <button onclick="handleAction('/reject/{{.GameId}}')">
-                        Reject
-                    </button>
-                    {{else if eq .Status "PENDING_OP"}}
-                    <button>Pending...</button>
-                    {{else if eq .Status "DENYED"}}
-                    <button onclick="handleAction('/delete/{{.GameId}}')">
-                        Delete
-                    </button>
-                    {{else if eq .Status "ACCEPTED"}}
-                    <button onclick="location.href='/game/{{.GameId}}'">
-                        Play
-                    </button>
-                    {{end}}
-                </td>
-            </tr>
-            {{end}}
         </table>
 
         <br />
         <br />
 
         <h1>Past Games</h1>
-        <table>
+        <table id="pastGameTable">
             <tr>
                 <th>Who Created the Game</th>
                 <th>Winner</th>
                 <th>Time</th>
                 <th>View Game</th>
             </tr>
-            {{range .pastgames}}
-            <tr>
-                <td>{{.UserOwnerName}}</td>
-                <td>
-                    {{if eq .Status "DENYED"}}
-                    <button onclick="handleAction('/delete/{{.GameId}}')">
-                        Delete
-                    </button>
-                    {{else if eq .Status "DENYED_OP"}} Declined {{else}}
-                    {{.Winner}} {{end}}
-                </td>
-                <td>{{.Time}}</td>
-                <td>
-                    <button onclick="location.href='/game/{{.GameId}}'">
-                        View Game
-                    </button>
-                </td>
-            </tr>
-            {{end}}
         </table>
     </body>
     <script>
+
+        const userId = {{.userId}}
+
+        // let  = {
+        //   gameid: 0,
+        //   userOwnerName: "",
+        //   currentTurn: "",
+        //   userOpponentName: "",
+        //   userPlayerShape: "",
+        //   status: "",
+        //   win: false,
+        //   winner: "",
+        //   time: ""
+        // };
+        //
+        let data
+
+        var activeGameTable = document.getElementById("activeGameTable");
+        var pastGameTable = document.getElementById("pastGameTable");
+
+        connectWebSocket(userId);
+
+        function connectWebSocket(userId) {
+            socket = new WebSocket(`ws://${location.host}/ws`);
+
+            socket.onopen = () => {
+                console.log("WebSocket connection opened.");
+                const message = {
+                    userId: userId,
+                    gameId: 0,
+                    action: 0,
+                };
+                socket.send(JSON.stringify(message));
+            };
+
+            socket.onmessage = (event) => {
+                data = JSON.parse(event.data);
+
+
+
+                for (const item of data) {
+                  // gameid
+                  row_id = "gameid-"+item.gameId;
+
+                  var row = document.getElementById(row_id)
+                  if (row == null) {
+                    row = document.createElement("tr");
+                  }
+
+                  // set game id
+                  row.id = row_id;
+
+                  // Check if it is a current or past game
+                  if(item.win || item.status == "DENYED" || item.status == "DENYED_OP"){
+                    table = pastGameTable;
+
+                    if (item.status == "DENYED"){
+                      row.innerHTML = `
+                          <td>${item.userOwnerName}</td>
+                          <td>
+                              <button onclick="handleAction('/delete/${item.gameId}')">Delete</button>
+                          </td>
+                          <td>${item.time}</td>
+                          <td>Game Ended</td>
+                      `;
+                    } else if (item.status == "DENYED_OP"){
+                      row.innerHTML = `
+                        <td>${item.userOwnerName}</td>
+                        <td>Declined</td>
+                        <td>${item.time}</td>
+                        <td>Game Ended</td>
+                      `;
+                    } else {
+                      row.innerHTML = `
+                        <td>${item.userOwnerName}</td>
+                        <td>${item.winner}</td>
+                        <td>${item.time}</td>
+                        <td><button onclick="location.href='/game/${item.gameId}'">View Game</button></td>
+                      `;
+                    }
+
+                  } else {
+                    table = activeGameTable;
+                    row.innerHTML = `
+                        <td>${item.userOpponentName}</td>
+                        <td>${item.currentTurn}</td>
+                        <td>${item.time}</td>
+                    `;
+
+                    if (item.status == "PENDING"){
+                      row.innerHTML += `
+                        </td>
+                          <button onclick="sendAction(1, ${item.gameId})">
+                              Accept
+                          </button>
+                          <button onclick="sendAction(2, ${item.gameId})">
+                              Reject
+                          </button>
+                        </td>`
+                    } else if (item.status == "PENDING_OP"){
+                      row.innerHTML += `
+                        </td>
+                          <button>
+                            Pending ...
+                          </button>
+                        </td>`
+                    } else if (item.status == "DENYED"){
+                      row.innerHTML += `
+                        </td>
+                          <button onclick="sendAction(3, ${item.gameId})">
+                            Delete
+                          </button>
+                        </td>`
+                    } else if (item.status == "ACCEPTED"){
+                      row.innerHTML += `
+                        </td>
+                          <button onclick="location.href='/game/${item.gameId}'">
+                              Play
+                          </button>
+                        </td>`
+                    }
+                  }
+
+                  table.appendChild(row);
+                }
+            };
+
+            socket.onerror = (err) => {
+                console.error("WebSocket error", err);
+            };
+
+            socket.onclose = () => {
+                console.log("WebSocket connection closed.");
+            };
+        }
+
+
         function handleAction(url) {
             fetch(url)
                 .then((response) => {
@@ -145,6 +236,20 @@
                 .catch((error) => {
                     console.error("Error:", error);
                 });
+        }
+
+
+        function sendAction(action, gameid) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+              const message = {
+                  userId: userId,
+                  gameId: gameid,
+                  action: action,
+              };
+              socket.send(JSON.stringify(message));
+            } else {
+                messageDiv.textContent = "WebSocket not connected.";
+            }
         }
     </script>
 </html>

@@ -10,90 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type webView struct {
-	GameId           int64
-	UserOwnerName    string
-	CurrentTurn      string
-	UserOpponentName string
-	UserPlayerShape  string
-	Status           string
-	Winner           string
-	Time             string
-}
-
 func loadHomePage(context *gin.Context) {
 	userId := context.GetInt64("userId")
 
-	games, err := models.GetGameByUserId(userId)
-
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Bad User"})
-		return
-	}
-
-	var activeGames []webView
-	var pastGames []webView
-
-	for _, game := range games {
-		win, winner := game.Board.CheckWin()
-
-		owner, err1 := models.GetUserById(game.UserOwnerId)
-		player, err2 := models.GetUserById(game.UserPlayerId)
-		if err1 != nil || err2 != nil {
-			continue
-		}
-
-		var tempGame webView
-		tempGame.GameId = game.GameId
-
-		tempGame.UserOwnerName = owner.UserName
-		if game.UserOwnerId == userId {
-			tempGame.UserOwnerName = "You"
-			tempGame.UserOpponentName = player.UserName
-		} else {
-			tempGame.UserOpponentName = owner.UserName
-		}
-
-		if game.Status == "PENDING" && game.UserOwnerId == userId {
-			tempGame.Status = "PENDING_OP"
-		} else if game.Status == "DENYED" && game.UserOwnerId != userId {
-			tempGame.Status = "DENYED_OP"
-		} else {
-			tempGame.Status = game.Status
-		}
-
-		if game.CurrentTurn == userId {
-			tempGame.CurrentTurn = "Your Turn"
-		} else {
-			tempGame.CurrentTurn = "Opponents Turn"
-		}
-
-		tempGame.Time = game.DateTime.Format("Jan 2 3:04 PM")
-
-		if win {
-			userShape := game.UserOwnerShape
-			if userId != game.UserOwnerId {
-				userShape = userShape * -1
-			}
-			if winner == userShape {
-				tempGame.Winner = "You Won! 😃"
-			} else if winner != 0 {
-				tempGame.Winner = "You Lost! 😥"
-			} else {
-				tempGame.Winner = "You Tied! 🤝"
-			}
-
-			pastGames = append(pastGames, tempGame)
-		} else if tempGame.Status == "DENYED" || tempGame.Status == "DENYED_OP" {
-			pastGames = append(pastGames, tempGame)
-		} else {
-			activeGames = append(activeGames, tempGame)
-		}
-	}
-
 	context.HTML(http.StatusOK, "home.html", gin.H{
-		"activegames": activeGames,
-		"pastgames":   pastGames,
+		"userId": userId,
 	})
 }
 
