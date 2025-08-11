@@ -79,7 +79,7 @@
         <h1>Past Games</h1>
         <table id="pastGameTable">
             <tr>
-                <th>Who Created the Game</th>
+                <th>Players</th>
                 <th>Winner</th>
                 <th>Time</th>
                 <th>View Game</th>
@@ -87,22 +87,9 @@
         </table>
     </body>
     <script>
-
         const userId = {{.userId}}
 
-        // let  = {
-        //   gameid: 0,
-        //   userOwnerName: "",
-        //   currentTurn: "",
-        //   userOpponentName: "",
-        //   userPlayerShape: "",
-        //   status: "",
-        //   win: false,
-        //   winner: "",
-        //   time: ""
-        // };
-        //
-        let data
+        let dataTable = []
 
         var activeGameTable = document.getElementById("activeGameTable");
         var pastGameTable = document.getElementById("pastGameTable");
@@ -123,95 +110,10 @@
             };
 
             socket.onmessage = (event) => {
-                data = JSON.parse(event.data);
-
-
-
-                for (const item of data) {
-                  // gameid
-                  row_id = "gameid-"+item.gameId;
-
-                  var row = document.getElementById(row_id)
-                  if (row == null) {
-                    row = document.createElement("tr");
-                  }
-
-                  // set game id
-                  row.id = row_id;
-
-                  // Check if it is a current or past game
-                  if(item.win || item.status == "DENYED" || item.status == "DENYED_OP"){
-                    table = pastGameTable;
-
-                    if (item.status == "DENYED"){
-                      row.innerHTML = `
-                          <td>${item.userOwnerName}</td>
-                          <td>
-                              <button onclick="handleAction('/delete/${item.gameId}')">Delete</button>
-                          </td>
-                          <td>${item.time}</td>
-                          <td>Game Ended</td>
-                      `;
-                    } else if (item.status == "DENYED_OP"){
-                      row.innerHTML = `
-                        <td>${item.userOwnerName}</td>
-                        <td>Declined</td>
-                        <td>${item.time}</td>
-                        <td>Game Ended</td>
-                      `;
-                    } else {
-                      row.innerHTML = `
-                        <td>${item.userOwnerName}</td>
-                        <td>${item.winner}</td>
-                        <td>${item.time}</td>
-                        <td><button onclick="location.href='/game/${item.gameId}'">View Game</button></td>
-                      `;
-                    }
-
-                  } else {
-                    table = activeGameTable;
-                    row.innerHTML = `
-                        <td>${item.userOpponentName}</td>
-                        <td>${item.currentTurn}</td>
-                        <td>${item.time}</td>
-                    `;
-
-                    if (item.status == "PENDING"){
-                      row.innerHTML += `
-                        </td>
-                          <button onclick="sendAction(1, ${item.gameId})">
-                              Accept
-                          </button>
-                          <button onclick="sendAction(2, ${item.gameId})">
-                              Reject
-                          </button>
-                        </td>`
-                    } else if (item.status == "PENDING_OP"){
-                      row.innerHTML += `
-                        </td>
-                          <button>
-                            Pending ...
-                          </button>
-                        </td>`
-                    } else if (item.status == "DENYED"){
-                      row.innerHTML += `
-                        </td>
-                          <button onclick="sendAction(3, ${item.gameId})">
-                            Delete
-                          </button>
-                        </td>`
-                    } else if (item.status == "ACCEPTED"){
-                      row.innerHTML += `
-                        </td>
-                          <button onclick="location.href='/game/${item.gameId}'">
-                              Play
-                          </button>
-                        </td>`
-                    }
-                  }
-
-                  table.appendChild(row);
-                }
+                newData = JSON.parse(event.data);
+                console.log(newData)
+                updateDataTable(newData)
+                renderTable();
             };
 
             socket.onerror = (err) => {
@@ -250,6 +152,135 @@
             } else {
                 messageDiv.textContent = "WebSocket not connected.";
             }
+        }
+
+        function updateDataTable(newData){
+
+          newData = Array.isArray(newData) ? newData : [newData];
+
+          for (const newItem of newData){
+            const index = dataTable.findIndex(item => item.gameId === newItem.gameId);
+            if (index !== -1) {
+              dataTable[index] = newItem; // Replace existing object
+            } else {
+              dataTable.push(newItem); // Add new game
+            }
+            dataTable.sort((a, b) => a.gameId + b.gameId);
+          }
+        }
+
+
+        function renderTable(){
+          document.querySelectorAll("#gameData").forEach(el => el.remove());
+
+
+          for (const item of dataTable) {
+              row = document.createElement("tr");
+              row.id = "gameData"
+
+            // Check if it is a current or past game
+            if(item.win || item.status == "DENYED"){
+              table = pastGameTable;
+
+              if (item.status == "DENYED"){
+                if (item.ownerId == userId){
+                  row.innerHTML = `
+                      <td>${item.ownerName}</td>
+                      <td>Game Ended</td>
+                      <td>${item.time}</td>
+                      <td>
+                          <button onclick="sendAction(3, ${item.gameId})">Delete</button>
+                      </td>`;
+                } else{
+                  row.innerHTML = `
+                    <td>${item.ownerName}</td>
+                    <td>Declined</td>
+                    <td>${item.time}</td>
+                    <td>Game Ended</td>
+                  `;
+                }
+              } else {
+                if ((item.winner == item.ownerShape) === (item.ownerId == userId)){
+                  winnerName = "You"
+                } else {
+                  if (item.winner == item.ownerShape){
+                    winnerName = item.ownerName
+                  }else{
+                    winnerName = item.opponentName
+                  }
+                }
+
+
+                row.innerHTML = `
+                  <td>${item.ownerName}, ${item.opponentName}</td>
+                  <td>${winnerName}</td>
+                  <td>${item.time}</td>
+                  <td><button onclick="location.href='/game/${item.gameId}'">View Game</button></td>
+                `;
+              }
+
+            } else {
+              table = activeGameTable;
+
+              if (item.currentTurn == userId){
+                turn = "Your Turn"
+              } else{
+                turn = "Opponents Turn"
+              }
+
+              if (item.ownerId == userId){
+                activeopponentname = item.opponentName
+              }else{
+                activeopponentname = item.ownerName
+              }
+
+
+              row.innerHTML = `
+                  <td>${activeopponentname}</td>
+                  <td>${turn}</td>
+                  <td>${item.time}</td>
+              `;
+
+              if (item.status == "PENDING"){
+                if (item.opponentId == userId){
+                  row.innerHTML += `
+                    </td>
+                      <button onclick="sendAction(1, ${item.gameId})">
+                          Accept
+                      </button>
+                      <button onclick="sendAction(2, ${item.gameId})">
+                          Reject
+                      </button>
+                    </td>`
+                } else{
+                  row.innerHTML += `
+                    </td>
+                      <button>
+                        Pending ...
+                      </button>
+                    </td>`
+                }
+              } else if (item.status == "DENYED"){
+                row.innerHTML += `
+                  </td>
+                    <button onclick="sendAction(3, ${item.gameId})">
+                      Delete
+                    </button>
+                  </td>`
+              } else if (item.status == "ACCEPTED"){
+                row.innerHTML += `
+                  </td>
+                    <button onclick="location.href='/game/${item.gameId}'">
+                        Play
+                    </button>
+                  </td>`
+              }
+            }
+
+            if (item.status != "DELETED"){
+              table.appendChild(row);
+            }
+          }
         }
     </script>
 </html>

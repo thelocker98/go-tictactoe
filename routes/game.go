@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"net/http"
 
 	"example.com/tictactoe/ai"
@@ -15,26 +16,17 @@ type webCreateGame struct {
 }
 
 type webView struct {
-	GameId           int64  `json:"gameId"`
-	UserOwnerName    string `json:"userOwnerName"`
-	CurrentTurn      string `json:"currentTurn"`
-	UserOpponentName string `json:"userOpponentName"`
-	UserPlayerShape  string `json:"userPlayerShape"`
-	Status           string `json:"status"`
-	Win              bool   `json:"win"`
-	Winner           string `json:"winner"`
-	Time             string `json:"time"`
-}
-
-type homePageData struct {
-	GameId           int64  `json:"gameId"`
-	UserOwnerName    string `json:"userOwnerName"`
-	UserOpponentName string `json:"userOpponentName"`
-	UserPlayerShape  string `json:"userPlayerShape"`
-	CurrentTurn      string `json:"currentTurn"`
-	Win              bool   `json:"win"`
-	Winner           string `json:"winner"`
-	Time             string `json:"time"`
+	GameId       int64  `json:"gameId"`
+	OwnerId      int64  `json:"ownerId"`
+	OwnerName    string `json:"ownerName"`
+	OpponentId   int64  `json:"opponentId"`
+	OpponentName string `json:"opponentName"`
+	CurrentTurn  int64  `json:"currentTurn"`
+	OwnerShape   int64  `json:"ownerShape"`
+	Win          bool   `json:"win"`
+	Winner       int64  `json:"winner"`
+	Status       string `json:"status"`
+	Time         string `json:"time"`
 }
 
 func createGame(context *gin.Context) {
@@ -81,15 +73,15 @@ func createGame(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"gameId": newGame.GameId})
 }
 
-func userAcceptGame(data HomeWSin) {
+func userAcceptGame(data gameCRUDData) (*models.Game, error) {
 	game, err := models.GetGameById(data.GameId)
 
 	if err != nil {
-		return
+		return nil, errors.New("Faild to find the game")
 	}
 
 	if game.UserPlayerId != data.UserId {
-		return
+		return nil, errors.New("User is not the player in this game")
 	}
 
 	if game.Status == "PENDING" {
@@ -97,21 +89,22 @@ func userAcceptGame(data HomeWSin) {
 
 		err := models.UpdateGame(game)
 		if err != nil {
-			return
+			return nil, errors.New("Failed to Update Database")
 		}
-		return
+		return game, nil
 	}
+	return nil, errors.New("Game in the Wrong State")
 }
 
-func userRejectGame(data HomeWSin) {
+func userRejectGame(data gameCRUDData) (*models.Game, error) {
 	game, err := models.GetGameById(data.GameId)
 
 	if err != nil {
-		return
+		return nil, errors.New("Faild to find the game")
 	}
 
 	if game.UserPlayerId != data.UserId {
-		return
+		return nil, errors.New("User is not the player in this game")
 	}
 	if game.Status == "PENDING" {
 		game.Status = "DENYED"
@@ -119,37 +112,40 @@ func userRejectGame(data HomeWSin) {
 		err := models.UpdateGame(game)
 
 		if err != nil {
-			return
+			return nil, errors.New("Failed to Update Database")
 		}
-		return
+		return game, nil
 	}
+	return nil, errors.New("Game in the Wrong State")
 }
 
-func userDeleteGame(data HomeWSin) {
+func userDeleteGame(data gameCRUDData) (*models.Game, error) {
 	game, err := models.GetGameById(data.GameId)
 
 	if err != nil {
-		return
+		return nil, errors.New("Faild to find the game")
 	}
 
 	if game.UserOwnerId != data.UserId {
-		return
+		return nil, errors.New("User does not own this game")
 	}
 	if game.Status == "DENYED" || game.Status == "PENDING" {
 
 		err := models.DeleteGame(game)
 
 		if err != nil {
-			return
+			return nil, errors.New("Delete Failed do to database error")
 		}
-		return
+		// add the deleted Flag so that the webpage knows not to deleted the Data
+		game.Status = "DELETED"
+		return game, nil
 	}
+	return nil, errors.New("Game in the Wrong State")
 }
 
 func loadHomepageData(userId int64) []webView {
 	// Setup variables for active and past games
 	var gameList []webView
-	var tempGame webView
 
 	// Get UserId
 	games, err := models.GetGameByUserId(userId)
@@ -158,62 +154,43 @@ func loadHomepageData(userId int64) []webView {
 	}
 
 	for _, game := range games {
-		win, winner := game.Board.CheckWin()
+		tempGame, err := proccessHomePageGame(game)
 
-		tempGame.GameId = game.GameId
-
-		if game.UserOwnerId == userId {
-			tempGame.UserOwnerName = "You"
-			player, err := models.GetUserById(game.UserPlayerId)
-			if err != nil {
-				continue
-			}
-			tempGame.UserOpponentName = player.UserName
-		} else {
-			tempGame.UserOpponentName = "You"
-			owner, err := models.GetUserById(game.UserPlayerId)
-			if err != nil {
-				continue
-			}
-			tempGame.UserOwnerName = owner.UserName
+		if err != nil {
+			continue
 		}
 
-		if game.Status == "PENDING" && game.UserOwnerId == userId {
-			tempGame.Status = "PENDING_OP"
-		} else if game.Status == "DENYED" && game.UserOwnerId != userId {
-			tempGame.Status = "DENYED_OP"
-		} else {
-			tempGame.Status = game.Status
-		}
-
-		if game.CurrentTurn == userId {
-			tempGame.CurrentTurn = "Your Turn"
-		} else {
-			tempGame.CurrentTurn = "Opponents Turn"
-		}
-
-		tempGame.Time = game.DateTime.Format("Jan 2 3:04 PM")
-
-		if win || tempGame.Status == "DENYED" || tempGame.Status == "DENYED_OP" {
-			userShape := game.UserOwnerShape
-			if userId != game.UserOwnerId {
-				userShape = userShape * -1
-			}
-			if !win {
-
-			} else if winner == userShape {
-				tempGame.Winner = "You Won! 😃"
-			} else if winner != 0 {
-				tempGame.Winner = "You Lost! 😥"
-			} else {
-				tempGame.Winner = "You Tied! 🤝"
-			}
-
-			tempGame.Win = true
-		} else {
-			tempGame.Win = false
-		}
 		gameList = append(gameList, tempGame)
 	}
 	return gameList
+}
+
+func proccessHomePageGame(game models.Game) (webView, error) {
+	win, winner := game.Board.CheckWin()
+
+	owner, err := models.GetUserById(game.UserOwnerId)
+	if err != nil {
+		return webView{}, errors.New("failed to get username from DB")
+	}
+
+	opponent, err := models.GetUserById(game.UserPlayerId)
+	if err != nil {
+		return webView{}, errors.New("failed to get username from DB")
+	}
+
+	time := game.DateTime.Format("Jan 2 3:04 PM")
+
+	return webView{
+		GameId:       game.GameId,
+		OwnerId:      game.UserOwnerId,
+		OwnerName:    owner.UserName,
+		OpponentId:   game.UserPlayerId,
+		OpponentName: opponent.UserName,
+		CurrentTurn:  game.CurrentTurn,
+		OwnerShape:   game.UserOwnerShape,
+		Win:          win,
+		Winner:       winner,
+		Status:       game.Status,
+		Time:         time,
+	}, nil
 }

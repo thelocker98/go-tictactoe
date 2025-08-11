@@ -9,13 +9,21 @@ import (
 )
 
 // Websocket game data
-type WSdataIn struct {
+type gameMoveData struct {
 	GameId int64 `json:"gameId"`
 	Move   int64 `json:"move"`
 }
 
+// Websocket game data
+type gameCRUDData struct {
+	UserId int64 `json:"userId"`
+	GameId int64 `json:"gameId"`
+	Action int64 `json:"action"` // 0 getlist, 1 accept, 2 deny, 3 delete
+}
+
 // Websocket data
 var gamedata []byte
+var homedata []byte
 
 // Websocket Upgrader
 var wsupgrader = websocket.Upgrader{
@@ -26,16 +34,6 @@ var wsupgrader = websocket.Upgrader{
 // Track active clients
 var gamePageClients = make(map[*websocket.Conn]int64)
 var homePageClients = make(map[*websocket.Conn]int64)
-
-// Websocket data
-var homedata []byte
-
-// Websocket game data
-type HomeWSin struct {
-	UserId int64 `json:"userId"`
-	GameId int64 `json:"gameId"`
-	Action int64 `json:"action"` // 0 getlist, 1 accept, 2 deny, 3 delete
-}
 
 func gameBoardWS(w http.ResponseWriter, r *http.Request, userId int64) {
 	// Setup and upgrade websocket
@@ -68,7 +66,7 @@ func gameBoardWS(w http.ResponseWriter, r *http.Request, userId int64) {
 		}
 
 		// Parse message in to the correct strucks
-		var GameIDData WSdataIn
+		var GameIDData gameMoveData
 		err = json.Unmarshal(msg, &GameIDData)
 		if err != nil {
 			conn.Close()
@@ -154,7 +152,7 @@ func homePageWS(w http.ResponseWriter, r *http.Request, userId int64) {
 		}
 
 		// Parse message in to the correct structs
-		var homeIDData HomeWSin
+		var homeIDData gameCRUDData
 		err = json.Unmarshal(msg, &homeIDData)
 		if err != nil {
 			conn.Close()
@@ -170,22 +168,59 @@ func homePageWS(w http.ResponseWriter, r *http.Request, userId int64) {
 
 		// add device to client list
 		homePageClients[conn] = userId
+		var homePageData []webView
 
 		// Look at action and make a move
 		if homeIDData.Action == 0 { // 0 getlist
-			homePageData := loadHomepageData(userId)
-			fmt.Println("homePageData")
-			// convert struct to json and check for errors
-			homedata, err = json.Marshal(homePageData)
+			homePageData = loadHomepageData(userId)
+		} else if homeIDData.Action == 1 { // 1 accept
+			fmt.Println("Accept")
+			game, err := userAcceptGame(homeIDData)
+			if err != nil {
+				continue
+			}
+			data, err := proccessHomePageGame(*game)
+			if err != nil {
+				continue
+			}
+			homePageData = append(homePageData, data)
+
+		} else if homeIDData.Action == 2 { // 2 deny
+			fmt.Println("Deny")
+			game, err := userRejectGame(homeIDData)
+			if err != nil {
+				continue
+			}
+			data, err := proccessHomePageGame(*game)
+			if err != nil {
+				continue
+			}
+			homePageData = append(homePageData, data)
+		} else if homeIDData.Action == 3 { // 3 delete
+			fmt.Println("Delete")
+			game, err := userDeleteGame(homeIDData)
+			if err != nil {
+				continue
+			}
+			fmt.Println(game)
+			data, err := proccessHomePageGame(*game)
+			if err != nil {
+				continue
+			}
+			homePageData = append(homePageData, data)
+		}
+
+		// convert struct to json and check for errors
+		for _, data := range homePageData {
+			homedata, err = json.Marshal(data)
 			if err != nil {
 				fmt.Println("Marshal error:", err)
 				return
 			}
-
 			// Broadcast message to all clients
 			fmt.Println(homePageClients)
 			for client, val := range homePageClients {
-				if val == userId {
+				if val == data.OwnerId || val == data.OpponentId {
 					if err := client.WriteMessage(websocket.TextMessage, homedata); err != nil {
 						fmt.Println("broadcast error:", err)
 						client.Close()
@@ -195,17 +230,6 @@ func homePageWS(w http.ResponseWriter, r *http.Request, userId int64) {
 					}
 				}
 			}
-		} else if homeIDData.Action == 1 { // 1 accept
-			fmt.Println("Accept")
-			userAcceptGame(homeIDData)
-
-		} else if homeIDData.Action == 2 { // 2 deny
-			fmt.Println("Deny")
-			userRejectGame(homeIDData)
-		} else if homeIDData.Action == 3 { // 3 delete
-			fmt.Println("Delete")
-			userDeleteGame(homeIDData)
 		}
-
 	}
 }

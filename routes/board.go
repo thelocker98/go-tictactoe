@@ -58,7 +58,7 @@ func getBoardLayout(userId int64, gameId int64) (webGame, error) {
 	return webGame, nil
 }
 
-func playMove(userId int64, WSgamedata WSdataIn) (webGame, error) {
+func playMove(userId int64, WSgamedata gameMoveData) (webGame, error) {
 	game, err := models.GetGameById(WSgamedata.GameId)
 
 	if err != nil || !(WSgamedata.Move >= 0 && WSgamedata.Move <= 8) {
