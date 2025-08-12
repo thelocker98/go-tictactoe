@@ -1,18 +1,15 @@
 # Dockerfile
-FROM python:3.10.16-bullseye
+FROM tip-alpine3.22
 
 WORKDIR /tempbuild
 # Copy App Over App
 COPY . /tempbuild
+RUN mkdir build
+RUN go build -o build/tictactoe main.go
 
-RUN go build .
-
-# Install Python Modules
-RUN python -m pip install --upgrade pip
-RUN pip install -r /srv/requirements.txt
-
-
+RUN mkdir /srv
+RUN mv build/tictactoe /srv/tictactoe
 
 
 # Launch
-CMD ["python","run.py"]
+CMD ["/srv/tictactoe"]
