@@ -1,4 +1,4 @@
-module example.com/tictactoe
+module gitea.locker98.com/locker98/go-tictactoe
 
 go 1.24.1
 

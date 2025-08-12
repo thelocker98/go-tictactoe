@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"example.com/tictactoe/ai"
-	"example.com/tictactoe/models"
+	"gitea.locker98.com/locker98/go-tictactoe/ai"
+	"gitea.locker98.com/locker98/go-tictactoe/models"
 	"github.com/gin-gonic/gin"
 )
 

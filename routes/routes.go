@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"example.com/tictactoe/middlewares"
+	"gitea.locker98.com/locker98/go-tictactoe/middlewares"
 	"github.com/gin-gonic/gin"
 )
 

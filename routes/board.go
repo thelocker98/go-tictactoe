@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"example.com/tictactoe/ai"
-	"example.com/tictactoe/models"
+	"gitea.locker98.com/locker98/go-tictactoe/ai"
+	"gitea.locker98.com/locker98/go-tictactoe/models"
 )
 
 type webGame struct {

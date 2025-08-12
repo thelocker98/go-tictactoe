@@ -3,8 +3,8 @@ package models
 import (
 	"errors"
 
-	"example.com/tictactoe/db"
-	"example.com/tictactoe/utils"
+	"gitea.locker98.com/locker98/go-tictactoe/db"
+	"gitea.locker98.com/locker98/go-tictactoe/utils"
 )
 
 type User struct {

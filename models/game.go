@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"example.com/tictactoe/board"
-	"example.com/tictactoe/db"
+	"gitea.locker98.com/locker98/go-tictactoe/board"
+	"gitea.locker98.com/locker98/go-tictactoe/db"
 )
 
 type Game struct {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"example.com/tictactoe/models"
+	"gitea.locker98.com/locker98/go-tictactoe/models"
 )
 
 func ComputerGameAccept(gameId int64) error {

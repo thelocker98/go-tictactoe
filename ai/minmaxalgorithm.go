@@ -1,7 +1,7 @@
 package ai
 
 import (
-	"example.com/tictactoe/board"
+	"gitea.locker98.com/locker98/go-tictactoe/board"
 )
 
 func score(b *board.Board, shape int64) (bool, int64) {

@@ -3,8 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"example.com/tictactoe/models"
-	"example.com/tictactoe/utils"
+	"gitea.locker98.com/locker98/go-tictactoe/models"
+	"gitea.locker98.com/locker98/go-tictactoe/utils"
 	"github.com/gin-gonic/gin"
 )
 

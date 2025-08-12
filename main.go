@@ -1,8 +1,8 @@
 package main
 
 import (
-	"example.com/tictactoe/db"
-	"example.com/tictactoe/routes"
+	"gitea.locker98.com/locker98/go-tictactoe/db"
+	"gitea.locker98.com/locker98/go-tictactoe/routes"
 	"github.com/gin-gonic/gin"
 )
 
