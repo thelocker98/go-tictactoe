@@ -1,15 +1,25 @@
-# Dockerfile
-FROM tip-alpine3.22
+# Build stage
+FROM golang:tip-alpine3.22 AS builder
 
-WORKDIR /tempbuild
-# Copy App Over App
-COPY . /tempbuild
-RUN mkdir build
-RUN go build -o build/tictactoe main.go
+# Install build deps for go-sqlite3
+RUN apk add --no-cache gcc musl-dev sqlite-dev
 
-RUN mkdir /srv
-RUN mv build/tictactoe /srv/tictactoe
+WORKDIR /app
+COPY . .
 
+# Enable CGO and build
+ENV CGO_ENABLED=1
+RUN go build -o /tictactoe main.go
 
-# Launch
+# Final stage
+FROM alpine:3.22
+
+# Install runtime SQLite libraries only
+RUN apk add --no-cache sqlite-libs
+
+WORKDIR /srv
+COPY --from=builder /tictactoe /srv/tictactoe
+COPY --from=builder /app/templates /srv/templates
+
+EXPOSE 8080
 CMD ["/srv/tictactoe"]
