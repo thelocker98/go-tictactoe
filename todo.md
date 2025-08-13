@@ -1,9 +1,0 @@
-# Todo
-Here is a list of things that need to be completed for this app to work:
-
-- [x] Setup the CreateGame API
-- [x] Create a way to accept and reject game requests
-- [x] Setup the Play Game interface
-- [ ] Create the computer agent that looks for games and plays them
-- [x] Fix inconsistencies in Home Page
-- [ ] Update all HTML and make it more clear

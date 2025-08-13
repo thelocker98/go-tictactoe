@@ -1,7 +1,6 @@
 services:
   web:
-    #image: gitea.locker98.com/locker98/go-tictactoe:1.0.1
-    image: tictactoe:1.0.1
+    image: gitea.locker98.com/locker98/go-tictactoe:latest
     container_name: webtictactoe
     restart: always
     volumes:

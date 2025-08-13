@@ -97,7 +97,8 @@
         connectWebSocket(userId);
 
         function connectWebSocket(userId) {
-            socket = new WebSocket(`ws://${location.host}/ws`);
+            const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+            socket = new WebSocket(`${protocol}${location.host}/ws`);
 
             socket.onopen = () => {
                 console.log("WebSocket connection opened.");
