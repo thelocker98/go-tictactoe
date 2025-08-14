@@ -1,166 +1,394 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
-        <title>Create Game</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Tic-Tac-Toe - Create Game</title>
+        <link rel="stylesheet" href="/css/styles.css" />
         <style>
-            *,
-            *::before,
-            *::after {
-                box-sizing: border-box;
+            .main-container {
+                width: 100%;
+                max-width: 600px;
+                position: relative;
+                z-index: 1;
             }
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f9f9f9;
-                margin: 0;
-                padding: 20px;
+
+            .header {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            .game-logo {
                 display: flex;
-                flex-direction: column;
                 align-items: center;
+                justify-content: center;
+                margin-bottom: 2rem;
+                gap: 0.5rem;
             }
 
-            h1 {
-                color: #333;
-                margin: 20px 0;
-            }
-
-            .top-button {
-                align-self: flex-end;
-                margin-bottom: 20px;
-            }
-
-            .top-button button {
-                background-color: #dc3545;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 14px;
-            }
-
-            .top-button button:hover {
-                background-color: #c82333;
-            }
-
-            form {
-                background-color: #fff;
-                padding: 30px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                min-width: 300px;
-                max-width: 500px;
-                width: 50%;
-            }
-
-            label {
-                display: block;
-                margin-bottom: 8px;
+            .game-logo h1 {
+                font-size: 2.5rem;
+                background: linear-gradient(
+                    45deg,
+                    #fff,
+                    rgba(255, 255, 255, 0.8)
+                );
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
                 font-weight: bold;
+                text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             }
 
-            .textbox {
-                width: 100%;
-                padding: 14px;
-                margin-bottom: 24px;
-                border-radius: 6px;
-                border: 1px solid #ccc;
-                font-size: 16px;
+            .tic-tac-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 22px);
+                grid-template-rows: repeat(3, 22px);
+                gap: 2px;
+                margin-left: 0.5rem;
             }
 
-            input:focus,
-            select:focus {
-                outline: none;
-                border-color: #007bff;
-                box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+            .grid-cell {
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 3px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: bold;
+                color: #667eea;
             }
 
-            button {
-                background-color: #28a745;
+            .page-title {
+                font-size: 1.8rem;
                 color: white;
-                border: none;
-                padding: 14px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 16px;
+                margin-bottom: 1.5rem;
+                text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .form-container {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(15px);
+                padding: 3rem 2.5rem;
+                border-radius: 25px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                border: 3px solid rgba(255, 255, 255, 0.3);
+            }
+
+            .form-group {
+                margin-bottom: 2rem;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 0.75rem;
+                font-weight: bold;
+                color: #333;
+                font-size: 1.1rem;
+            }
+
+            .form-input,
+            .form-select {
                 width: 100%;
+                padding: 1rem;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.9);
             }
 
-            button:hover {
-                background-color: #218838;
+            .form-input:focus,
+            .form-select:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                transform: translateY(-2px);
             }
 
-            #suggestions {
+            .form-input::placeholder {
+                color: #999;
+            }
+
+            .form-select {
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+                background-position: right 0.75rem center;
+                background-repeat: no-repeat;
+                background-size: 1.5em 1.5em;
+            }
+
+            #opponentInput {
+                display: none;
+            }
+
+            .suggestions-container {
                 position: relative;
             }
 
-            #suggestions ul {
+            .suggestions-list {
                 position: absolute;
-                background-color: #fff;
-                border: 1px solid #ccc;
-                max-height: 150px;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border: 2px solid #e0e0e0;
+                border-top: none;
+                border-radius: 0 0 12px 12px;
+                max-height: 200px;
                 overflow-y: auto;
-                width: 100%;
-                list-style: none;
-                padding: 0;
-                margin: 0;
-                border-radius: 4px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
                 z-index: 1000;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             }
 
-            #suggestions li {
-                padding: 10px;
+            .suggestion-item {
+                padding: 1rem;
                 cursor: pointer;
+                transition: all 0.2s ease;
+                border-bottom: 1px solid #f0f0f0;
             }
 
-            #suggestions li:hover {
-                background-color: #f0f0f0;
+            .suggestion-item:hover {
+                background: linear-gradient(
+                    45deg,
+                    rgba(102, 126, 234, 0.1),
+                    rgba(118, 75, 162, 0.1)
+                );
+                color: #667eea;
+            }
+
+            .suggestion-item:last-child {
+                border-bottom: none;
+                border-radius: 0 0 10px 10px;
+            }
+
+            .create-btn {
+                width: 100%;
+                padding: 1.25rem;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 1.2rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+
+            .create-btn::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.2),
+                    transparent
+                );
+                transition: left 0.6s;
+            }
+
+            .create-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }
+
+            .create-btn:hover::before {
+                left: 100%;
+            }
+
+            .create-btn:active {
+                transform: translateY(-1px);
+            }
+
+            .icon-label {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .game-settings {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+                margin-top: 1rem;
+            }
+
+            @media (max-width: 640px) {
+                .main-container {
+                    margin: 1rem;
+                }
+
+                .form-container {
+                    padding: 2rem 1.5rem;
+                }
+
+                .game-logo h1 {
+                    font-size: 2rem;
+                }
+
+                .action-buttons {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .btn {
+                    width: 200px;
+                }
+
+                .game-settings {
+                    grid-template-columns: 1fr;
+                    gap: 1rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .form-container {
+                    padding: 1.5rem 1rem;
+                }
+
+                .page-title {
+                    font-size: 1.5rem;
+                }
             }
         </style>
     </head>
+
     <body>
-        <button onclick="location.href='/logout'">Logout</button>
-        <h1>Create New Game</h1>
+        <div class="floating-symbols" id="floatingSymbols"></div>
 
-        <form id="createGameForm">
-            <label for="opponentType">Opponent:</label>
-            <select
-                id="opponentType"
-                class="textbox"
-                name="opponentType"
-                onchange="toggleOpponentInput()"
-            >
-                <option value="computer">Computer</option>
-                <option value="human">Choose a Player</option>
-            </select>
+        <div class="main-container">
+            <header class="header">
+                <div class="game-logo">
+                    <h1>TIC-TAC-TOE</h1>
+                    <div class="tic-tac-grid">
+                        <div class="grid-cell">X</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell">O</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell">X</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell">O</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell">X</div>
+                    </div>
+                </div>
 
-            <input
-                type="text"
-                id="opponentInput"
-                class="textbox"
-                name="opponentInput"
-                placeholder="Start typing a name..."
-                autocomplete="off"
-            />
-            <div id="suggestions" style="position: relative"></div>
+                <h2 class="page-title">🎮 Create New Game</h2>
 
-            <label for="turnChoice">Who Goes First?</label>
-            <select name="firstTurn" id="turnChoice" class="textbox">
-                <option value="opponent">Opponent</option>
-                <option value="me">Me</option>
-            </select>
+                <div class="action-buttons">
+                    <button class="btn btn-home" onclick="location.href='/'">
+                        🏠 Back to Dashboard
+                    </button>
+                    <button
+                        class="btn btn-logout"
+                        onclick="location.href='/logout'"
+                    >
+                        🚪 Logout
+                    </button>
+                </div>
+            </header>
 
-            <label for="symbolChoice">Choose Your Symbol:</label>
-            <select name="symbol" id="symbolChoice" class="textbox">
-                <option value="X">X</option>
-                <option value="O">O</option>
-            </select>
+            <div class="form-container">
+                <form id="createGameForm">
+                    <div class="form-group">
+                        <label for="opponentType" class="icon-label">
+                            🤖 Choose Your Opponent:
+                        </label>
+                        <select
+                            id="opponentType"
+                            class="form-select"
+                            name="opponentType"
+                            onchange="toggleOpponentInput()"
+                        >
+                            <option value="computer">🤖 Computer</option>
+                            <option value="human">👤 Human Player</option>
+                        </select>
+                    </div>
 
-            <button type="submit">Start Game</button>
-        </form>
+                    <div class="form-group">
+                        <div class="suggestions-container">
+                            <input
+                                type="text"
+                                id="opponentInput"
+                                class="form-input"
+                                name="opponentInput"
+                                placeholder="Start typing a player's name..."
+                                autocomplete="off"
+                            />
+                            <div id="suggestions"></div>
+                        </div>
+                    </div>
+
+                    <div class="game-settings">
+                        <div class="form-group">
+                            <label for="turnChoice" class="icon-label">
+                                🎯 Who Goes First?
+                            </label>
+                            <select
+                                name="firstTurn"
+                                id="turnChoice"
+                                class="form-select"
+                            >
+                                <option value="opponent">Opponent</option>
+                                <option value="me">Me</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="symbolChoice" class="icon-label">
+                                ⚡ Choose Your Symbol:
+                            </label>
+                            <select
+                                name="symbol"
+                                id="symbolChoice"
+                                class="form-select"
+                                onchange="updateSymbolPreview()"
+                            >
+                                <option value="X">X</option>
+                                <option value="O">O</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="create-btn">
+                        🚀 Start Game!
+                    </button>
+                </form>
+            </div>
+        </div>
 
         <script>
+            // Create floating symbols
+            function createFloatingSymbols() {
+                const container = document.getElementById("floatingSymbols");
+                const symbols = ["X", "O"];
+
+                for (let i = 0; i < 15; i++) {
+                    const symbol = document.createElement("div");
+                    symbol.className = "symbol";
+                    symbol.textContent = symbols[Math.random() > 0.5 ? 1 : 0];
+                    symbol.style.left = Math.random() * 100 + "%";
+                    symbol.style.animationDelay = Math.random() * 25 + "s";
+                    symbol.style.animationDuration =
+                        20 + Math.random() * 15 + "s";
+                    container.appendChild(symbol);
+                }
+            }
+
+            // Initialize floating symbols
+            createFloatingSymbols();
+
+            // Original game logic preserved
             let players = [];
+            let blurTimeout;
 
             async function loadPlayers() {
                 try {
@@ -184,7 +412,6 @@
 
             const input = document.getElementById("opponentInput");
             const suggestionsBox = document.getElementById("suggestions");
-            let blurTimeout;
 
             input.addEventListener("input", () => {
                 clearTimeout(blurTimeout);
@@ -199,17 +426,21 @@
 
                 if (matches.length === 0) return;
 
-                const ul = document.createElement("ul");
+                const suggestionsList = document.createElement("div");
+                suggestionsList.className = "suggestions-list";
+
                 matches.forEach((player) => {
-                    const li = document.createElement("li");
-                    li.textContent = player.name;
-                    li.addEventListener("mousedown", () => {
+                    const suggestionItem = document.createElement("div");
+                    suggestionItem.className = "suggestion-item";
+                    suggestionItem.textContent = player.name;
+                    suggestionItem.addEventListener("mousedown", () => {
                         input.value = player.name;
                         suggestionsBox.innerHTML = "";
                     });
-                    ul.appendChild(li);
+                    suggestionsList.appendChild(suggestionItem);
                 });
-                suggestionsBox.appendChild(ul);
+
+                suggestionsBox.appendChild(suggestionsList);
             });
 
             input.addEventListener("blur", () => {
@@ -220,10 +451,18 @@
 
             function toggleOpponentInput() {
                 const type = document.getElementById("opponentType").value;
-                document.getElementById("opponentInput").style.display =
+                const opponentInput = document.getElementById("opponentInput");
+                opponentInput.style.display =
                     type === "computer" ? "none" : "block";
+
+                if (type === "computer") {
+                    opponentInput.required = false;
+                } else {
+                    opponentInput.required = true;
+                }
             }
 
+            // Initialize
             toggleOpponentInput();
             loadPlayers();
 
@@ -250,11 +489,19 @@
                             .value.trim();
                         const player = players.find((p) => p.name === name);
                         if (!player) {
-                            alert("Player not found!");
+                            alert(
+                                "Player not found! Please select a player from the suggestions.",
+                            );
                             return;
                         }
                         opponentId = player.id;
                     }
+
+                    // Disable button and show loading state
+                    const submitBtn = document.querySelector(".create-btn");
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = "⏳ Creating Game...";
+                    submitBtn.disabled = true;
 
                     fetch("/creategame", {
                         method: "POST",
@@ -274,11 +521,16 @@
                             return response.json();
                         })
                         .then((data) => {
-                            window.location.href = "/";
+                            submitBtn.textContent = "✅ Game Created!";
+                            setTimeout(() => {
+                                window.location.href = "/";
+                            }, 1000);
                         })
                         .catch((err) => {
                             console.error(err);
-                            alert("Failed to create game.");
+                            alert("Failed to create game. Please try again.");
+                            submitBtn.textContent = originalText;
+                            submitBtn.disabled = false;
                         });
                 });
         </script>

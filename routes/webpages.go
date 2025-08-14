@@ -67,24 +67,6 @@ func loadLoginPage(context *gin.Context) {
 	return
 }
 
-func loadSigninPage(context *gin.Context) {
-	cookie, err := context.Cookie("session")
-	if err != nil {
-		context.HTML(http.StatusOK, "signup.html", gin.H{"title": "Signup"})
-		return
-	}
-
-	_, err = utils.VerifyToken(cookie)
-	if err != nil {
-		context.HTML(http.StatusOK, "signup.html", gin.H{"title": "Signup"})
-		return
-	}
-
-	context.Redirect(http.StatusFound, "/")
-	context.Abort()
-	return
-}
-
 func createGamePage(context *gin.Context) {
 	context.HTML(http.StatusOK, "creategame.html", gin.H{"title": "Create Game"})
 }

@@ -2,70 +2,454 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>Tic Tac Toe WS</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Tic-Tac-Toe - Game Board</title>
         <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
             body {
-                font-family: sans-serif;
+                font-family: "Arial", sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow-x: hidden;
+                padding: 1rem;
             }
-            #home-button {
-                margin-top: 10px;
-                margin-bottom: 10px;
-                padding: 10px 20px;
-                font-size: 1em;
-                background-color: #007bff;
+
+            /* Floating X's and O's background animation */
+            .floating-symbols {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .symbol {
+                position: absolute;
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: rgba(255, 255, 255, 0.1);
+                animation: float 20s infinite linear;
+            }
+
+            @keyframes float {
+                0% {
+                    transform: translateY(100vh) rotate(0deg);
+                }
+                100% {
+                    transform: translateY(-100px) rotate(360deg);
+                }
+            }
+
+            .game-container {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(15px);
+                border-radius: 25px;
+                padding: 3rem 2.5rem;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                border: 3px solid rgba(255, 255, 255, 0.3);
+                position: relative;
+                z-index: 1;
+                max-width: 500px;
+                width: 100%;
+                text-align: center;
+            }
+
+            .game-header {
+                margin-bottom: 2rem;
+            }
+
+            .game-title {
+                font-size: 2.5rem;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-weight: bold;
+                margin-bottom: 1rem;
+                text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .btn-home {
+                padding: 0.75rem 2rem;
+                background: linear-gradient(45deg, #667eea, #764ba2);
                 color: white;
                 border: none;
-                border-radius: 5px;
+                border-radius: 25px;
+                font-size: 1rem;
+                font-weight: bold;
                 cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
             }
-            #home-button:hover {
-                background-color: #0056b3;
+
+            .btn-home::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.2),
+                    transparent
+                );
+                transition: left 0.6s;
             }
+
+            .btn-home:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }
+
+            .btn-home:hover::before {
+                left: 100%;
+            }
+
             #board {
                 display: grid;
-                grid-template-columns: repeat(3, 100px);
-                grid-template-rows: repeat(3, 100px);
-                gap: 5px;
-                margin-top: 20px;
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+                gap: 10px;
+                margin: 2rem auto;
+                max-width: 300px;
+                width: 100%;
+                aspect-ratio: 1;
+                padding: 20px;
+                background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+                border-radius: 20px;
+                box-shadow:
+                    inset 5px 5px 15px #d0d0d0,
+                    inset -5px -5px 15px #ffffff;
             }
+
             .cell {
-                width: 100px;
-                height: 100px;
-                font-size: 2em;
-                text-align: center;
-                line-height: 100px;
-                background-color: #eee;
+                aspect-ratio: 1;
+                font-size: 5rem;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(145deg, #ffffff, #f0f0f0);
+                border-radius: 15px;
                 cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                box-shadow:
+                    3px 3px 8px #d0d0d0,
+                    -3px -3px 8px #ffffff;
+                user-select: none;
             }
+
+            .cell:hover {
+                transform: translateY(-2px);
+                box-shadow:
+                    5px 5px 15px #d0d0d0,
+                    -5px -5px 15px #ffffff,
+                    0 8px 25px rgba(102, 126, 234, 0.2);
+            }
+
+            .cell:active {
+                transform: translateY(0px);
+                box-shadow:
+                    inset 2px 2px 5px #d0d0d0,
+                    inset -2px -2px 5px #ffffff;
+            }
+
+            .cell.disabled {
+                cursor: not-allowed;
+                opacity: 0.7;
+            }
+
+            .cell.disabled:hover {
+                transform: none;
+                box-shadow:
+                    3px 3px 8px #d0d0d0,
+                    -3px -3px 8px #ffffff;
+            }
+
+            .cell-x {
+                color: #667eea;
+                text-shadow: 2px 2px 4px rgba(102, 126, 234, 0.3);
+                animation: placeX 0.5s ease;
+            }
+
+            .cell-o {
+                color: #764ba2;
+                text-shadow: 2px 2px 4px rgba(118, 75, 162, 0.3);
+                animation: placeO 0.5s ease;
+            }
+
+            @keyframes placeX {
+                0% {
+                    transform: scale(0) rotate(180deg);
+                    opacity: 0;
+                }
+                50% {
+                    transform: scale(1.2) rotate(90deg);
+                }
+                100% {
+                    transform: scale(1) rotate(0deg);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes placeO {
+                0% {
+                    transform: scale(0) rotate(-180deg);
+                    opacity: 0;
+                }
+                50% {
+                    transform: scale(1.2) rotate(-90deg);
+                }
+                100% {
+                    transform: scale(1) rotate(0deg);
+                    opacity: 1;
+                }
+            }
+
             #message {
-                margin-top: 20px;
+                margin-top: 2rem;
+                padding: 1rem 2rem;
+                border-radius: 20px;
+                font-size: 1.1rem;
+                font-weight: bold;
+                text-align: center;
+                min-height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+
+            .message-your-turn {
+                background: linear-gradient(
+                    45deg,
+                    rgba(40, 167, 69, 0.1),
+                    rgba(52, 206, 87, 0.1)
+                );
+                color: #28a745;
+                border: 2px solid #28a745;
+                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+                animation: pulse 2s infinite;
+            }
+
+            .message-waiting {
+                background: linear-gradient(
+                    45deg,
+                    rgba(255, 193, 7, 0.1),
+                    rgba(255, 205, 58, 0.1)
+                );
+                color: #ffc107;
+                border: 2px solid #ffc107;
+                box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+            }
+
+            .message-win {
+                background: linear-gradient(
+                    45deg,
+                    rgba(40, 167, 69, 0.1),
+                    rgba(52, 206, 87, 0.1)
+                );
+                color: #28a745;
+                border: 2px solid #28a745;
+                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                animation: celebration 1s ease-in-out;
+            }
+
+            .message-lose {
+                background: linear-gradient(
+                    45deg,
+                    rgba(220, 53, 69, 0.1),
+                    rgba(232, 85, 99, 0.1)
+                );
+                color: #dc3545;
+                border: 2px solid #dc3545;
+                box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+            }
+
+            .message-tie {
+                background: linear-gradient(
+                    45deg,
+                    rgba(108, 117, 125, 0.1),
+                    rgba(138, 147, 154, 0.1)
+                );
+                color: #6c757d;
+                border: 2px solid #6c757d;
+                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+            }
+
+            .message-error {
+                background: linear-gradient(
+                    45deg,
+                    rgba(220, 53, 69, 0.1),
+                    rgba(232, 85, 99, 0.1)
+                );
+                color: #dc3545;
+                border: 2px solid #dc3545;
+                box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+                }
+                50% {
+                    transform: scale(1.02);
+                    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+                }
+            }
+
+            @keyframes celebration {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                25% {
+                    transform: scale(1.05) rotate(1deg);
+                }
+                75% {
+                    transform: scale(1.05) rotate(-1deg);
+                }
+            }
+
+            .winning-line {
+                position: relative;
+            }
+
+            .winning-line::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 150%;
+                height: 4px;
+                background: linear-gradient(45deg, #28a745, #34ce57);
+                transform: translate(-50%, -50%);
+                border-radius: 2px;
+                animation: drawLine 0.5s ease-in-out;
+                box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+            }
+
+            @keyframes drawLine {
+                0% {
+                    width: 0%;
+                    opacity: 0;
+                }
+                100% {
+                    width: 150%;
+                    opacity: 1;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .game-container {
+                    padding: 2rem 1.5rem;
+                    margin: 1rem;
+                }
+
+                .game-title {
+                    font-size: 2rem;
+                }
+
+                #board {
+                    max-width: 280px;
+                    padding: 15px;
+                    gap: 8px;
+                }
+
+                .cell {
+                    font-size: 2rem;
+                }
+
+                #message {
+                    font-size: 1rem;
+                    padding: 0.75rem 1.5rem;
+                }
+            }
+
+            @media (max-width: 360px) {
+                #board {
+                    max-width: 250px;
+                    padding: 12px;
+                    gap: 6px;
+                }
+
+                .cell {
+                    font-size: 1.8rem;
+                }
             }
         </style>
     </head>
-    <body>
-        <h1>Tic Tac Toe WS</h1>
-        <button id="home-button" onclick="window.location.href='/'">
-            Home
-        </button>
 
-        <div id="board"></div>
-        <div id="message"></div>
+    <body>
+        <div class="floating-symbols" id="floatingSymbols"></div>
+
+        <div class="game-container">
+            <div class="game-header">
+                <h1 class="game-title">TIC-TAC-TOE</h1>
+                <button class="btn-home" onclick="window.location.href='/'">
+                    🏠 Back to Dashboard
+                </button>
+            </div>
+
+            <div id="board"></div>
+            <div id="message" class="message-waiting">
+                Connecting to game...
+            </div>
+        </div>
 
         <script>
-            const userid = {{.userId}}
+            // Create floating symbols
+            function createFloatingSymbols() {
+                const container = document.getElementById('floatingSymbols');
+                const symbols = ['X', 'O'];
+
+                for (let i = 0; i < 15; i++) {
+                    const symbol = document.createElement('div');
+                    symbol.className = 'symbol';
+                    symbol.textContent = symbols[Math.random() > 0.5 ? 1 : 0];
+                    symbol.style.left = Math.random() * 100 + '%';
+                    symbol.style.animationDelay = Math.random() * 20 + 's';
+                    symbol.style.animationDuration = (15 + Math.random() * 10) + 's';
+                    container.appendChild(symbol);
+                }
+            }
+
+            // Initialize floating symbols
+            createFloatingSymbols();
+
+            // Original game logic preserved
+            const userid = {{.userId}};
             const boardDiv = document.getElementById("board");
             const messageDiv = document.getElementById("message");
 
             let webGame = {
-              board: Array(9).fill(0),   // array of 9 integers
-              userId: 0,                 // integer (can be BigInt if needed)
-              userTurn: false,           // boolean
-              userShape: 0,              // integer
-              userWin: false,            // boolean
-              userWinner: 0              // integer
+                board: Array(9).fill(0),
+                userId: 0,
+                userTurn: false,
+                userShape: 0,
+                userWin: false,
+                userWinner: 0
             };
 
             let socket = null;
@@ -78,10 +462,9 @@
             const gameid = getGameIdFromUrl();
             connectWebSocket(gameid);
 
-
             function connectWebSocket(id) {
-              const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-              socket = new WebSocket(`${protocol}${location.host}/gamelayout/ws`);
+                const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+                socket = new WebSocket(`${protocol}${location.host}/gamelayout/ws`);
 
                 socket.onopen = () => {
                     console.log("WebSocket connection opened.");
@@ -94,39 +477,44 @@
 
                 socket.onmessage = (event) => {
                     const data = JSON.parse(event.data);
-                    webGame.board = data.board
-                    webGame.userId = userid
-                    webGame.userWin = data.userWin
-                    webGame.userWinner = data.userWinner
-                    if (userid == data.userId)
-                    {
-                      webGame.userTurn = data.userTurn
-                      webGame.userShape = data.userShape
+                    webGame.board = data.board;
+                    webGame.userId = userid;
+                    webGame.userWin = data.userWin;
+                    webGame.userWinner = data.userWinner;
+
+                    if (userid == data.userId) {
+                        webGame.userTurn = data.userTurn;
+                        webGame.userShape = data.userShape;
+                    } else {
+                        webGame.userTurn = !data.userTurn;
+                        webGame.userShape = -data.userShape;
                     }
-                    else{
-                      webGame.userTurn = !data.userTurn
-                      webGame.userShape = -data.userShape
-                    }
+
                     renderBoard(webGame);
 
                     if (!webGame.userTurn && !webGame.userWinner) {
-                        messageDiv.textContent = "Waiting for opponent...";
+                        showMessage("⏳ Waiting for opponent...", "message-waiting");
                     } else if (webGame.userWin) {
                         displayGameWin(webGame);
                     } else {
-                        messageDiv.textContent = "Your Turn";
+                        showMessage("🎯 Your Turn - Make your move!", "message-your-turn");
                     }
                 };
 
                 socket.onerror = (err) => {
                     console.error("WebSocket error", err);
-                    messageDiv.textContent = "WebSocket error.";
+                    showMessage("❌ Connection error. Please try again.", "message-error");
                 };
 
                 socket.onclose = () => {
                     console.log("WebSocket connection closed.");
-                    messageDiv.textContent = "Disconnected from server.";
+                    showMessage("🔌 Disconnected from server.", "message-error");
                 };
+            }
+
+            function showMessage(text, className) {
+                messageDiv.textContent = text;
+                messageDiv.className = className;
             }
 
             function renderBoard(webGame) {
@@ -137,14 +525,22 @@
                 board.forEach((value, idx) => {
                     const cell = document.createElement("div");
                     cell.className = "cell";
-                    cell.textContent =
-                        value === 1 ? "X" : value === -1 ? "O" : "";
+
+                    if (value === 1) {
+                        cell.textContent = "X";
+                        cell.classList.add("cell-x");
+                    } else if (value === -1) {
+                        cell.textContent = "O";
+                        cell.classList.add("cell-o");
+                    }
 
                     // Only enable clicks when it's your turn and the cell is empty
-                    if (webGame.userTurn && value === 0) {
+                    if (webGame.userTurn && value === 0 && !webGame.userWin) {
                         cell.addEventListener("click", () => sendMove(idx));
+                        cell.style.cursor = "pointer";
                     } else {
-                        cell.style.pointerEvents = "none";
+                        cell.classList.add("disabled");
+                        cell.style.cursor = "not-allowed";
                     }
 
                     boardDiv.appendChild(cell);
@@ -155,21 +551,24 @@
                 if (socket && socket.readyState === WebSocket.OPEN) {
                     socket.send(JSON.stringify({ gameid, move: index }));
                 } else {
-                    messageDiv.textContent = "WebSocket not connected.";
+                    showMessage("❌ WebSocket not connected.", "message-error");
                 }
             }
 
             function displayGameWin(webGame) {
                 if (webGame.userWin) {
                     if (webGame.userWinner === webGame.userShape) {
-                        messageDiv.textContent = "You won!";
+                        showMessage("🎉 Congratulations! You won!", "message-win");
                     } else if (webGame.userWinner === 0) {
-                        messageDiv.textContent = "It's a tie!";
+                        showMessage("🤝 It's a tie! Good game!", "message-tie");
                     } else {
-                        messageDiv.textContent = "You lose!";
+                        showMessage("😔 You lose! Better luck next time!", "message-lose");
                     }
+
+                    // Disable all cells
                     boardDiv.querySelectorAll(".cell").forEach((cell) => {
-                        cell.style.pointerEvents = "none";
+                        cell.classList.add("disabled");
+                        cell.style.cursor = "not-allowed";
                     });
                 }
             }
