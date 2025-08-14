@@ -3,14 +3,9 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/css/styles.css" />
         <title>Tic-Tac-Toe - Game Board</title>
         <style>
-            * {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
-
             body {
                 font-family: "Arial", sans-serif;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -22,34 +17,6 @@
                 position: relative;
                 overflow-x: hidden;
                 padding: 1rem;
-            }
-
-            /* Floating X's and O's background animation */
-            .floating-symbols {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                pointer-events: none;
-                z-index: 0;
-            }
-
-            .symbol {
-                position: absolute;
-                font-size: 1.5rem;
-                font-weight: bold;
-                color: rgba(255, 255, 255, 0.1);
-                animation: float 20s infinite linear;
-            }
-
-            @keyframes float {
-                0% {
-                    transform: translateY(100vh) rotate(0deg);
-                }
-                100% {
-                    transform: translateY(-100px) rotate(360deg);
-                }
             }
 
             .game-container {
@@ -65,7 +32,6 @@
                 width: 100%;
                 text-align: center;
             }
-
             .game-header {
                 margin-bottom: 2rem;
             }
@@ -79,47 +45,6 @@
                 font-weight: bold;
                 margin-bottom: 1rem;
                 text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            }
-
-            .btn-home {
-                padding: 0.75rem 2rem;
-                background: linear-gradient(45deg, #667eea, #764ba2);
-                color: white;
-                border: none;
-                border-radius: 25px;
-                font-size: 1rem;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                position: relative;
-                overflow: hidden;
-                margin-bottom: 1.5rem;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            }
-
-            .btn-home::before {
-                content: "";
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(
-                    90deg,
-                    transparent,
-                    rgba(255, 255, 255, 0.2),
-                    transparent
-                );
-                transition: left 0.6s;
-            }
-
-            .btn-home:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            }
-
-            .btn-home:hover::before {
-                left: 100%;
             }
 
             #board {
@@ -404,14 +329,36 @@
     <body>
         <div class="floating-symbols" id="floatingSymbols"></div>
 
-        <div class="game-container">
-            <div class="game-header">
-                <h1 class="game-title">TIC-TAC-TOE</h1>
-                <button class="btn-home" onclick="window.location.href='/'">
-                    🏠 Back to Dashboard
-                </button>
+        <header class="header">
+            <div class="game-logo">
+                <h1>TIC-TAC-TOE</h1>
+                <div class="tic-tac-grid">
+                    <div class="grid-cell">X</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">O</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">X</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">O</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">X</div>
+                </div>
             </div>
 
+            <div class="action-buttons">
+                <button class="btn btn-home" onclick="location.href='/'">
+                    🏠 Back to Dashboard
+                </button>
+                <button
+                    class="btn btn-logout"
+                    onclick="location.href='/logout'"
+                >
+                    🚪 Logout
+                </button>
+            </div>
+        </header>
+
+        <div class="game-container">
             <div id="board"></div>
             <div id="message" class="message-waiting">
                 Connecting to game...

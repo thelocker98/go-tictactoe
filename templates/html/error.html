@@ -3,14 +3,9 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/css/styles.css" />
         <title>Tic-Tac-Toe - Error</title>
         <style>
-            * {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
-
             body {
                 font-family: "Arial", sans-serif;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -22,34 +17,6 @@
                 position: relative;
                 overflow: hidden;
                 padding: 1rem;
-            }
-
-            /* Floating X's and O's background animation */
-            .floating-symbols {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                pointer-events: none;
-                z-index: 0;
-            }
-
-            .symbol {
-                position: absolute;
-                font-size: 1.5rem;
-                font-weight: bold;
-                color: rgba(255, 255, 255, 0.08);
-                animation: float 25s infinite linear;
-            }
-
-            @keyframes float {
-                0% {
-                    transform: translateY(100vh) rotate(0deg);
-                }
-                100% {
-                    transform: translateY(-100px) rotate(360deg);
-                }
             }
 
             .error-container {
@@ -64,43 +31,6 @@
                 position: relative;
                 z-index: 1;
                 border: 3px solid rgba(255, 255, 255, 0.3);
-            }
-
-            .game-logo {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-bottom: 2rem;
-                gap: 0.5rem;
-            }
-
-            .game-logo h1 {
-                font-size: 2rem;
-                background: linear-gradient(45deg, #667eea, #764ba2);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-                font-weight: bold;
-                margin: 0;
-            }
-
-            .tic-tac-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 18px);
-                grid-template-rows: repeat(3, 18px);
-                gap: 2px;
-                margin-left: 0.5rem;
-            }
-
-            .grid-cell {
-                background: #667eea;
-                border-radius: 2px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 10px;
-                font-weight: bold;
-                color: white;
             }
 
             .error-icon {
@@ -140,69 +70,6 @@
                 border: 2px solid rgba(220, 53, 69, 0.2);
                 border-radius: 15px;
                 word-wrap: break-word;
-            }
-
-            .action-buttons {
-                display: flex;
-                gap: 1rem;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .btn {
-                padding: 1rem 2rem;
-                border: none;
-                border-radius: 25px;
-                font-size: 1.1rem;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                text-decoration: none;
-                display: inline-block;
-                position: relative;
-                overflow: hidden;
-                min-width: 120px;
-            }
-
-            .btn-primary {
-                background: linear-gradient(45deg, #667eea, #764ba2);
-                color: white;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            }
-
-            .btn-secondary {
-                background: linear-gradient(45deg, #6c757d, #8a939a);
-                color: white;
-                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-            }
-
-            .btn::before {
-                content: "";
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(
-                    90deg,
-                    transparent,
-                    rgba(255, 255, 255, 0.2),
-                    transparent
-                );
-                transition: left 0.6s;
-            }
-
-            .btn:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            }
-
-            .btn:hover::before {
-                left: 100%;
-            }
-
-            .btn:active {
-                transform: translateY(-1px);
             }
 
             /* Error-specific styling */
@@ -251,7 +118,7 @@
                     margin: 0.25rem;
                 }
 
-                .game-logo h1 {
+                .game-logo-blue h1 {
                     font-size: 1.5rem;
                 }
 
@@ -271,11 +138,7 @@
 
     <body>
         <div class="floating-symbols" id="floatingSymbols"></div>
-
-        <div class="error-container">
-            <div class="error-decoration top-left">X</div>
-            <div class="error-decoration bottom-right">O</div>
-
+        <header class="header">
             <div class="game-logo">
                 <h1>TIC-TAC-TOE</h1>
                 <div class="tic-tac-grid">
@@ -290,6 +153,23 @@
                     <div class="grid-cell">X</div>
                 </div>
             </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-home" onclick="location.href='/'">
+                    🏠 Back to Dashboard
+                </button>
+                <button
+                    class="btn btn-logout"
+                    onclick="location.href='/logout'"
+                >
+                    🚪 Logout
+                </button>
+            </div>
+        </header>
+
+        <div class="error-container">
+            <div class="error-decoration top-left">X</div>
+            <div class="error-decoration bottom-right">O</div>
 
             <div class="error-icon">❌</div>
 
