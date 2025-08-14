@@ -10,6 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func stylesCSS(context *gin.Context) {
+
+	context.HTML(http.StatusOK, "styles.css", gin.H{})
+}
+
 func loadHomePage(context *gin.Context) {
 	userId := context.GetInt64("userId")
 
@@ -39,7 +44,7 @@ func loadGamePage(context *gin.Context) {
 		return
 	}
 	fmt.Println(userId)
-	context.HTML(http.StatusOK, "gamews.html", gin.H{
+	context.HTML(http.StatusOK, "game.html", gin.H{
 		"userId": userId,
 	})
 }

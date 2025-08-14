@@ -8,10 +8,11 @@ import (
 
 func main() {
 	db.InitDB()
-
+	//gin.SetMode(gin.ReleaseMode)
 	server := gin.Default()
 
-	server.LoadHTMLGlob("templates/*")
+	server.LoadHTMLGlob("templates/html/*.html")
+	server.Static("/css", "templates/css")
 
 	routes.RegisterRoutes(server)
 
