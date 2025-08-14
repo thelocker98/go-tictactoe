@@ -8,7 +8,7 @@ import (
 
 func main() {
 	db.InitDB()
-	//gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	server := gin.Default()
 
 	server.LoadHTMLGlob("templates/html/*.html")

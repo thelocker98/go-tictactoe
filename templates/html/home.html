@@ -148,6 +148,11 @@
                 font-weight: bold;
             }
 
+            .winner-tie {
+                color: #ffc107;
+                font-weight: bold;
+            }
+
             .winner-opponent {
                 color: #dc3545;
                 font-weight: bold;
@@ -451,8 +456,11 @@
                         } else {
                             let winnerName;
                             let winnerClass;
+                            if (item.win == true && item.winner == 0) {
+                              winnerName = "Tie";
+                              winnerClass = "winner-tie";
 
-                            if ((item.winner == item.ownerShape) === (item.ownerId == userId)) {
+                            } else if ((item.winner == item.ownerShape) === (item.ownerId == userId)) {
                                 winnerName = "You";
                                 winnerClass = "winner-you";
                             } else {

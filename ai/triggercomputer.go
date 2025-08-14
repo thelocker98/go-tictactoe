@@ -2,7 +2,6 @@ package ai
 
 import (
 	"errors"
-	"fmt"
 
 	"gitea.locker98.com/locker98/go-tictactoe/models"
 )
@@ -53,8 +52,6 @@ func ComputerPlayMove(gameId int64) error {
 		game.Board.Board[move] = computerShape
 
 		game.CurrentTurn = game.UserOwnerId
-
-		fmt.Println(game.Board)
 
 		err = models.UpdateGame(game)
 		if err != nil {

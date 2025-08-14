@@ -87,8 +87,6 @@ func gameBoardWS(w http.ResponseWriter, r *http.Request, userId int64) {
 
 			}
 		} else {
-			// Print out move
-			fmt.Println("Move", GameIDData.Move)
 			// Play move
 			webGameData, err = playMove(userId, GameIDData)
 		}
@@ -106,15 +104,12 @@ func gameBoardWS(w http.ResponseWriter, r *http.Request, userId int64) {
 		}
 
 		// Broadcast message to all clients
-		fmt.Println(gamePageClients)
 		for client, val := range gamePageClients {
 			if val == GameIDData.GameId {
 				if err := client.WriteMessage(websocket.TextMessage, gamedata); err != nil {
 					fmt.Println("broadcast error:", err)
 					client.Close()
 					delete(gamePageClients, client)
-				} else {
-					fmt.Println(val)
 				}
 			}
 		}
@@ -174,7 +169,6 @@ func homePageWS(w http.ResponseWriter, r *http.Request, userId int64) {
 		if homeIDData.Action == 0 { // 0 getlist
 			homePageData = loadHomepageData(userId)
 		} else if homeIDData.Action == 1 { // 1 accept
-			fmt.Println("Accept")
 			game, err := userAcceptGame(homeIDData)
 			if err != nil {
 				continue
@@ -186,7 +180,6 @@ func homePageWS(w http.ResponseWriter, r *http.Request, userId int64) {
 			homePageData = append(homePageData, data)
 
 		} else if homeIDData.Action == 2 { // 2 deny
-			fmt.Println("Deny")
 			game, err := userRejectGame(homeIDData)
 			if err != nil {
 				continue
@@ -197,12 +190,10 @@ func homePageWS(w http.ResponseWriter, r *http.Request, userId int64) {
 			}
 			homePageData = append(homePageData, data)
 		} else if homeIDData.Action == 3 { // 3 delete
-			fmt.Println("Delete")
 			game, err := userDeleteGame(homeIDData)
 			if err != nil {
 				continue
 			}
-			fmt.Println(game)
 			data, err := proccessHomePageGame(*game)
 			if err != nil {
 				continue
@@ -218,15 +209,12 @@ func homePageWS(w http.ResponseWriter, r *http.Request, userId int64) {
 				return
 			}
 			// Broadcast message to all clients
-			fmt.Println(homePageClients)
 			for client, val := range homePageClients {
 				if val == data.OwnerId || val == data.OpponentId {
 					if err := client.WriteMessage(websocket.TextMessage, homedata); err != nil {
 						fmt.Println("broadcast error:", err)
 						client.Close()
 						delete(homePageClients, client)
-					} else {
-						fmt.Println(val)
 					}
 				}
 			}
