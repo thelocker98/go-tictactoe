@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/css/styles.css" />
+        <title>Tic-Tac-Toe - Join the Game</title>
+        <style>
+            body {
+                font-family: "Arial", sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .auth-container {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 3rem 2.5rem;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                width: 400px;
+                max-width: 90vw;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                position: relative;
+                z-index: 1;
+                border: 3px solid #f0f0f0;
+            }
+
+            .mode-toggle {
+                display: flex;
+                background: #f0f0f0;
+                border-radius: 25px;
+                padding: 4px;
+                margin-bottom: 2rem;
+                width: 100%;
+            }
+
+            .mode-btn {
+                flex: 1;
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 20px;
+                background: transparent;
+                color: #666;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 1rem;
+            }
+
+            .mode-btn.active {
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+            }
+
+            .form-container {
+                width: 100%;
+            }
+
+            .auth-form {
+                width: 100%;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+                position: relative;
+            }
+
+            .auth-form input {
+                width: 100%;
+                padding: 1rem;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.9);
+            }
+
+            .auth-form input:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .auth-form input::placeholder {
+                color: #999;
+            }
+
+            .switch-text {
+                text-align: center;
+                font-size: 0.9rem;
+                color: #666;
+                margin-top: 1rem;
+            }
+
+            .switch-link {
+                color: #667eea;
+                text-decoration: none;
+                font-weight: bold;
+                cursor: pointer;
+                transition: color 0.3s ease;
+            }
+
+            .switch-link:hover {
+                color: #764ba2;
+            }
+
+            .dialog {
+                width: 100%;
+                padding: 1rem;
+                text-align: center;
+                border-radius: 8px;
+                margin-top: 1rem;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                display: none;
+            }
+
+            .dialog.show {
+                display: block;
+                animation: slideIn 0.3s ease;
+            }
+
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .success {
+                background: rgba(76, 175, 80, 0.1);
+                color: #4caf50;
+                border: 1px solid #4caf50;
+            }
+
+            .error {
+                background: rgba(244, 67, 54, 0.1);
+                color: #f44336;
+                border: 1px solid #f44336;
+            }
+
+            #usernameGroup {
+                display: none;
+            }
+
+            .show {
+                display: block !important;
+            }
+
+            @media (max-width: 480px) {
+                .auth-container {
+                    padding: 2rem 1.5rem;
+                    margin: 1rem;
+                }
+
+                .game-logo h1 {
+                    font-size: 2rem;
+                }
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 3rem;
+                position: fixed;
+                top: 10%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="floating-symbols" id="floatingSymbols"></div>
+        <header class="header">
+            <div class="game-logo">
+                <h1>TIC-TAC-TOE</h1>
+                <div class="tic-tac-grid">
+                    <div class="grid-cell">X</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">O</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">X</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">O</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">X</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="auth-container">
+            <div class="mode-toggle">
+                <button class="mode-btn active" id="loginBtn">Login</button>
+                <button class="mode-btn" id="signupBtn">Sign Up</button>
+            </div>
+
+            <div class="form-container">
+                <form class="auth-form" id="authForm">
+                    <div class="form-group">
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="Email"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group" id="usernameGroup">
+                        <input
+                            type="text"
+                            id="username"
+                            placeholder="Username"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Password"
+                            required
+                        />
+                    </div>
+
+                    <button type="submit" class="btn submit-btn" id="submitBtn">
+                        LOGIN TO PLAY
+                    </button>
+                </form>
+
+                <div class="switch-text" id="switchText">
+                    Don't have an account?
+                    <span class="switch-link" id="switchLink"
+                        >Sign up to play!</span
+                    >
+                </div>
+
+                <div class="dialog" id="messageDialog"></div>
+            </div>
+        </div>
+
+        <script>
+            // Create floating symbols
+            function createFloatingSymbols() {
+                const container = document.getElementById("floatingSymbols");
+                const symbols = ["X", "O"];
+
+                for (let i = 0; i < 15; i++) {
+                    const symbol = document.createElement("div");
+                    symbol.className = "symbol";
+                    symbol.textContent = symbols[Math.random() > 0.5 ? 1 : 0];
+                    symbol.style.left = Math.random() * 100 + "%";
+                    symbol.style.animationDelay = Math.random() * 20 + "s";
+                    symbol.style.animationDuration =
+                        15 + Math.random() * 10 + "s";
+                    container.appendChild(symbol);
+                }
+            }
+
+            // Initialize floating symbols
+            createFloatingSymbols();
+
+            // Mode switching functionality
+            const loginBtn = document.getElementById("loginBtn");
+            const signupBtn = document.getElementById("signupBtn");
+            const usernameGroup = document.getElementById("usernameGroup");
+            const usernameInput = document.getElementById("username");
+            const submitBtn = document.getElementById("submitBtn");
+            const switchText = document.getElementById("switchText");
+            const switchLink = document.getElementById("switchLink");
+            const authForm = document.getElementById("authForm");
+            const messageDialog = document.getElementById("messageDialog");
+
+            let isLoginMode = true;
+
+            function switchToLogin() {
+                isLoginMode = true;
+                loginBtn.classList.add("active");
+                signupBtn.classList.remove("active");
+                usernameGroup.classList.remove("show");
+                usernameInput.required = false;
+                submitBtn.textContent = "LOGIN TO PLAY";
+                switchText.innerHTML = `Don't have an account? <span class="switch-link" id="switchLink">Sign up to play!</span>`;
+                setupSwitchListener();
+                hideMessage();
+            }
+
+            function switchToSignup() {
+                isLoginMode = false;
+                signupBtn.classList.add("active");
+                loginBtn.classList.remove("active");
+                usernameGroup.classList.add("show");
+                usernameInput.required = true;
+                submitBtn.textContent = "JOIN THE GAME";
+                switchText.innerHTML = `Already have an account? <span class="switch-link" id="switchLink">Login to play!</span>`;
+                setupSwitchListener();
+                hideMessage();
+            }
+
+            function setupSwitchListener() {
+                const newSwitchLink = document.getElementById("switchLink");
+                newSwitchLink.addEventListener("click", () => {
+                    if (isLoginMode) {
+                        switchToSignup();
+                    } else {
+                        switchToLogin();
+                    }
+                });
+            }
+
+            function showMessage(text, isSuccess = false) {
+                messageDialog.textContent = text;
+                messageDialog.className = `dialog show ${isSuccess ? "success" : "error"}`;
+            }
+
+            function hideMessage() {
+                messageDialog.classList.remove("show");
+            }
+
+            // Event listeners
+            loginBtn.addEventListener("click", switchToLogin);
+            signupBtn.addEventListener("click", switchToSignup);
+            setupSwitchListener();
+
+            // Check URL parameters on page load
+            window.addEventListener("DOMContentLoaded", () => {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get("status") === "success") {
+                    showMessage(
+                        "Account created successfully! Please log in.",
+                        true,
+                    );
+                } else if (params.get("status") === "pleaselogin") {
+                    showMessage("You must be authenticated to play!", false);
+                }
+            });
+
+            // Form submission
+            authForm.addEventListener("submit", async function (event) {
+                event.preventDefault();
+
+                const email = document.getElementById("email").value;
+                const password = document.getElementById("password").value;
+                const username = document.getElementById("username").value;
+
+                const endpoint = isLoginMode ? "/login" : "/signup";
+                const requestBody = isLoginMode
+                    ? { email, password }
+                    : { email, password, username };
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(requestBody),
+                    });
+
+                    if (response.ok) {
+                        if (isLoginMode) {
+                            showMessage(
+                                "Login successful! Redirecting...",
+                                true,
+                            );
+                            window.location.href = "/";
+                        } else {
+                            showMessage("Account created successfully!", true);
+                            setTimeout(() => {
+                                window.location.href = "/login?status=success";
+                            }, 1500);
+                        }
+                    } else {
+                        const errorText = isLoginMode
+                            ? "Login failed. Please check your credentials."
+                            : "Signup failed. Please try again.";
+                        showMessage(errorText, false);
+                    }
+                } catch (error) {
+                    showMessage("Network error. Please try again.", false);
+                }
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/css/styles.css" />
+        <title>Tic-Tac-Toe - Error</title>
+        <style>
+            body {
+                font-family: "Arial", sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+                padding: 1rem;
+            }
+
+            .error-container {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(15px);
+                padding: 3rem 2.5rem;
+                border-radius: 25px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                width: 500px;
+                max-width: 90vw;
+                text-align: center;
+                position: relative;
+                z-index: 1;
+                border: 3px solid rgba(255, 255, 255, 0.3);
+            }
+
+            .error-icon {
+                font-size: 4rem;
+                margin-bottom: 1.5rem;
+                animation: shake 1s ease-in-out;
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px) rotate(-5deg);
+                }
+                75% {
+                    transform: translateX(5px) rotate(5deg);
+                }
+            }
+
+            .error-title {
+                font-size: 2.5rem;
+                color: #dc3545;
+                margin-bottom: 1.5rem;
+                font-weight: bold;
+                text-shadow: 2px 2px 4px rgba(220, 53, 69, 0.2);
+            }
+
+            .error-message {
+                color: #555;
+                margin-bottom: 2.5rem;
+                font-size: 1.2rem;
+                line-height: 1.6;
+                padding: 1.5rem;
+                background: rgba(220, 53, 69, 0.05);
+                border: 2px solid rgba(220, 53, 69, 0.2);
+                border-radius: 15px;
+                word-wrap: break-word;
+            }
+
+            /* Error-specific styling */
+            .error-decoration {
+                position: absolute;
+                font-size: 8rem;
+                font-weight: bold;
+                color: rgba(220, 53, 69, 0.05);
+                z-index: -1;
+            }
+
+            .error-decoration.top-left {
+                top: -2rem;
+                left: -2rem;
+                transform: rotate(-15deg);
+            }
+
+            .error-decoration.bottom-right {
+                bottom: -2rem;
+                right: -2rem;
+                transform: rotate(15deg);
+            }
+
+            @media (max-width: 640px) {
+                .error-container {
+                    padding: 2rem 1.5rem;
+                    margin: 1rem;
+                }
+
+                .error-title {
+                    font-size: 2rem;
+                }
+
+                .error-message {
+                    font-size: 1rem;
+                    padding: 1rem;
+                }
+
+                .action-buttons {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .btn {
+                    width: 200px;
+                    margin: 0.25rem;
+                }
+
+                .game-logo-blue h1 {
+                    font-size: 1.5rem;
+                }
+
+                .error-icon {
+                    font-size: 3rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .helpful-tips {
+                    padding: 1rem;
+                    font-size: 0.9rem;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="floating-symbols" id="floatingSymbols"></div>
+        <header class="header">
+            <div class="game-logo">
+                <h1>TIC-TAC-TOE</h1>
+                <div class="tic-tac-grid">
+                    <div class="grid-cell">X</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">O</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">X</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">O</div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell">X</div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-home" onclick="location.href='/'">
+                    🏠 Back to Dashboard
+                </button>
+                <button
+                    class="btn btn-logout"
+                    onclick="location.href='/logout'"
+                >
+                    🚪 Logout
+                </button>
+            </div>
+        </header>
+
+        <div class="error-container">
+            <div class="error-decoration top-left">X</div>
+            <div class="error-decoration bottom-right">O</div>
+
+            <div class="error-icon">❌</div>
+
+            <h1 class="error-title">Oops! Something Went Wrong</h1>
+
+            <div class="error-message">{{.ErrorMessage}}</div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="location.href='/'">
+                    🏠 Go Home
+                </button>
+                <button
+                    class="btn btn-secondary"
+                    onclick="location.href='/logout'"
+                >
+                    🚪 Logout
+                </button>
+            </div>
+
+            <div class="helpful-tips"></div>
+        </div>
+
+        <script>
+            // Create floating symbols
+            function createFloatingSymbols() {
+                const container = document.getElementById("floatingSymbols");
+                const symbols = ["X", "O"];
+
+                for (let i = 0; i < 12; i++) {
+                    const symbol = document.createElement("div");
+                    symbol.className = "symbol";
+                    symbol.textContent = symbols[Math.random() > 0.5 ? 1 : 0];
+                    symbol.style.left = Math.random() * 100 + "%";
+                    symbol.style.animationDelay = Math.random() * 25 + "s";
+                    symbol.style.animationDuration =
+                        20 + Math.random() * 15 + "s";
+                    container.appendChild(symbol);
+                }
+            }
+
+            // Initialize floating symbols
+            createFloatingSymbols();
+
+            // Add some interactive feedback
+            document.addEventListener("DOMContentLoaded", function () {
+                const errorIcon = document.querySelector(".error-icon");
+
+                // Add a subtle bounce animation after initial shake
+                setTimeout(() => {
+                    errorIcon.style.animation =
+                        "shake 1s ease-in-out, bounce 2s infinite 1s";
+                }, 1000);
+            });
+
+            // Simple bounce keyframes for the error icon
+            const style = document.createElement("style");
+            style.textContent = `
+                @keyframes bounce {
+                    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+                    40% { transform: translateY(-10px); }
+                    60% { transform: translateY(-5px); }
+                }
+            `;
+            document.head.appendChild(style);
+        </script>
+    </body>
+</html>

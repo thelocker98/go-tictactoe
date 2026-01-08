@@ -1,0 +1,13 @@
+services:
+  web:
+    image: gitea.locker98.com/locker98/go-tictactoe:latest
+    container_name: webtictactoe
+    restart: always
+    volumes:
+      - ./data:/srv/database/
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "1555:8080"
+    environment:
+      - TZ=America/New_York # Set your desired timezone

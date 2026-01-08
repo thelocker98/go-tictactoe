@@ -1,58 +1,20 @@
 package main
 
 import (
-	"fmt"
-
-	"example.com/tictactoe/board"
-	"example.com/tictactoe/play"
-	"example.com/tictactoe/player"
+	"gitea.locker98.com/locker98/go-tictactoe/db"
+	"gitea.locker98.com/locker98/go-tictactoe/routes"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	clearScreen()
-	fmt.Println("TicTacToe")
-	currentboard := board.NewBoard()
+	db.InitDB()
+	gin.SetMode(gin.ReleaseMode)
+	server := gin.Default()
 
-	user, err := player.NewUser()
-	if err != nil {
-		panic(err)
-	}
+	server.LoadHTMLGlob("templates/html/*.html")
+	server.Static("/css", "templates/css")
 
-	computer_shape := map[int]string{-1: "O", 1: "X"}[user.Shape*-1]
-	computer, _ := player.New("Computer", !user.GoFirst, computer_shape)
+	routes.RegisterRoutes(server)
 
-	win := false
-	winner := 0
-	user_first := user.GoFirst
-	for !win {
-		clearScreen()
-
-		if user_first {
-			err := play.UserPlay(&currentboard, user)
-			if err != nil {
-				continue
-			}
-
-		} else {
-			err := play.ComputerPlay(&currentboard, computer)
-			if err != nil {
-				continue
-			}
-		}
-
-		win, winner = currentboard.CheckWin()
-		fmt.Println(win, winner)
-
-		user_first = !user_first
-	}
-	clearScreen()
-
-	winningUser := play.GetWinner(winner, user, computer)
-	winningUser.EndGame()
-
-	currentboard.PrintBoard()
-}
-
-func clearScreen() {
-	fmt.Println("\x1b[2J\x1b[H")
+	server.Run(":8080")
 }

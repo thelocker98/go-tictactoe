@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Tic-Tac-Toe - Game Dashboard</title>
+        <link rel="stylesheet" href="/css/styles.css" />
+        <style>
+            /* Homepage buttons for table */
+            .table-btn {
+                padding: 0.5rem 1.2rem;
+                border: none;
+                border-radius: 20px;
+                font-size: 0.9rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin: 0 0.25rem;
+                min-width: 80px;
+            }
+
+            .btn-play {
+                background: linear-gradient(45deg, #28a745, #34ce57);
+                color: white;
+            }
+
+            .btn-accept {
+                background: linear-gradient(45deg, #17a2b8, #20c1db);
+                color: white;
+            }
+
+            .btn-reject {
+                background: linear-gradient(45deg, #dc3545, #e85563);
+                color: white;
+            }
+
+            .btn-delete {
+                background: linear-gradient(45deg, #6c757d, #8a939a);
+                color: white;
+            }
+
+            .btn-pending {
+                background: linear-gradient(45deg, #ffc107, #ffcd3a);
+                color: #333;
+                cursor: not-allowed;
+            }
+
+            .btn-view {
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+            }
+
+            .table-btn:hover:not(.btn-pending) {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+            .games-section {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 2rem;
+                margin-bottom: 2rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+                color: #333;
+                margin-bottom: 1.5rem;
+                text-align: center;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .section-title::before,
+            .section-title::after {
+                content: "";
+                height: 2px;
+                flex: 1;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                border-radius: 1px;
+            }
+
+            .game-table {
+                width: 100%;
+                border-collapse: collapse;
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            }
+
+            .game-table th {
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                padding: 1rem;
+                text-align: center;
+                font-weight: bold;
+                font-size: 1rem;
+                letter-spacing: 0.5px;
+            }
+
+            .game-table td {
+                padding: 1rem;
+                text-align: center;
+                border-bottom: 1px solid #f0f0f0;
+                vertical-align: middle;
+            }
+
+            .game-table tr:hover {
+                background: rgba(102, 126, 234, 0.05);
+                transform: scale(1.01);
+                transition: all 0.2s ease;
+            }
+
+            .game-table tr:last-child td {
+                border-bottom: none;
+            }
+
+            .status-indicator {
+                display: inline-block;
+                padding: 0.3rem 0.8rem;
+                border-radius: 15px;
+                font-size: 0.8rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .status-your-turn {
+                background: rgba(40, 167, 69, 0.1);
+                color: #28a745;
+                border: 1px solid #28a745;
+            }
+
+            .status-opponent-turn {
+                background: rgba(255, 193, 7, 0.1);
+                color: #ffc107;
+                border: 1px solid #ffc107;
+            }
+
+            .winner-you {
+                color: #28a745;
+                font-weight: bold;
+            }
+
+            .winner-tie {
+                color: #ffc107;
+                font-weight: bold;
+            }
+
+            .winner-opponent {
+                color: #dc3545;
+                font-weight: bold;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 3rem 2rem;
+                color: #666;
+                font-style: italic;
+            }
+
+            .empty-state .empty-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                opacity: 0.3;
+            }
+
+            @media (max-width: 768px) {
+                .main-container {
+                    padding: 1rem;
+                }
+
+                .game-logo h1 {
+                    font-size: 2rem;
+                }
+
+                .action-buttons {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .btn {
+                    width: 200px;
+                }
+
+                .games-section {
+                    padding: 1.5rem;
+                }
+
+                .game-table {
+                    font-size: 0.9rem;
+                }
+
+                .game-table th,
+                .game-table td {
+                    padding: 0.75rem 0.5rem;
+                }
+
+                .table-btn {
+                    padding: 0.4rem 0.8rem;
+                    font-size: 0.8rem;
+                    min-width: 60px;
+                    margin: 0.1rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .game-table th,
+                .game-table td {
+                    padding: 0.5rem 0.25rem;
+                    font-size: 0.8rem;
+                }
+
+                .section-title {
+                    font-size: 1.4rem;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="floating-symbols" id="floatingSymbols"></div>
+
+        <div class="main-container">
+            <header class="header">
+                <div class="game-logo">
+                    <h1>TIC-TAC-TOE</h1>
+                    <div class="tic-tac-grid">
+                        <div class="grid-cell">X</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell">O</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell">X</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell">O</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell">X</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button
+                        class="btn btn-creategame-home"
+                        onclick="location.href='/creategame'"
+                    >
+                        🎮 New Game
+                    </button>
+                    <button
+                        class="btn btn-logout"
+                        onclick="location.href='/logout'"
+                    >
+                        🚪 Logout
+                    </button>
+                </div>
+            </header>
+
+            <section class="games-section">
+                <h2 class="section-title">⚡ Active Games</h2>
+                <table class="game-table" id="activeGameTable">
+                    <thead>
+                        <tr>
+                            <th>Your Opponent</th>
+                            <th>Turn</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic content will be inserted here -->
+                    </tbody>
+                </table>
+                <div
+                    class="empty-state"
+                    id="activeGamesEmpty"
+                    style="display: none"
+                >
+                    <div class="empty-icon">🎯</div>
+                    <p>
+                        No active games yet. Start a new game to begin playing!
+                    </p>
+                </div>
+            </section>
+
+            <section class="games-section">
+                <h2 class="section-title">📜 Past Games</h2>
+                <table class="game-table" id="pastGameTable">
+                    <thead>
+                        <tr>
+                            <th>Players</th>
+                            <th>Winner</th>
+                            <th>Time</th>
+                            <th>View Game</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic content will be inserted here -->
+                    </tbody>
+                </table>
+                <div
+                    class="empty-state"
+                    id="pastGamesEmpty"
+                    style="display: none"
+                >
+                    <div class="empty-icon">🏆</div>
+                    <p>
+                        No completed games yet. Your game history will appear
+                        here.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <script>
+            // Create floating symbols
+            function createFloatingSymbols() {
+                const container = document.getElementById('floatingSymbols');
+                const symbols = ['X', 'O'];
+
+                for (let i = 0; i < 20; i++) {
+                    const symbol = document.createElement('div');
+                    symbol.className = 'symbol';
+                    symbol.textContent = symbols[Math.random() > 0.5 ? 1 : 0];
+                    symbol.style.left = Math.random() * 100 + '%';
+                    symbol.style.animationDelay = Math.random() * 25 + 's';
+                    symbol.style.animationDuration = (20 + Math.random() * 15) + 's';
+                    container.appendChild(symbol);
+                }
+            }
+
+            // Initialize floating symbols
+            createFloatingSymbols();
+
+            // Original JavaScript functionality preserved
+            const userId = {{.userId}};
+            let dataTable = [];
+            let socket;
+
+            var activeGameTable = document.getElementById("activeGameTable").querySelector('tbody');
+            var pastGameTable = document.getElementById("pastGameTable").querySelector('tbody');
+            var activeGamesEmpty = document.getElementById("activeGamesEmpty");
+            var pastGamesEmpty = document.getElementById("pastGamesEmpty");
+
+            connectWebSocket(userId);
+
+            function connectWebSocket(userId) {
+                const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+                socket = new WebSocket(`${protocol}${location.host}/ws`);
+
+                socket.onopen = () => {
+                    console.log("WebSocket connection opened.");
+                    const message = {
+                        userId: userId,
+                        gameId: 0,
+                        action: 0,
+                    };
+                    socket.send(JSON.stringify(message));
+                };
+
+                socket.onmessage = (event) => {
+                    newData = JSON.parse(event.data);
+                    console.log(newData);
+                    updateDataTable(newData);
+                    renderTable();
+                };
+
+                socket.onerror = (err) => {
+                    console.error("WebSocket error", err);
+                };
+
+                socket.onclose = () => {
+                    console.log("WebSocket connection closed.");
+                };
+            }
+
+            function handleAction(url) {
+                fetch(url)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Request failed");
+                        }
+                        location.reload();
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            }
+
+            function sendAction(action, gameid) {
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    const message = {
+                        userId: userId,
+                        gameId: gameid,
+                        action: action,
+                    };
+                    socket.send(JSON.stringify(message));
+                } else {
+                    console.error("WebSocket not connected.");
+                }
+            }
+
+            function updateDataTable(newData) {
+                newData = Array.isArray(newData) ? newData : [newData];
+
+                for (const newItem of newData) {
+                    const index = dataTable.findIndex(item => item.gameId === newItem.gameId);
+                    if (index !== -1) {
+                        dataTable[index] = newItem;
+                    } else {
+                        dataTable.push(newItem);
+                    }
+                }
+                dataTable.sort((a, b) => a.gameId + b.gameId);
+            }
+
+            function renderTable() {
+                // Clear existing rows
+                activeGameTable.innerHTML = '';
+                pastGameTable.innerHTML = '';
+
+                let activeGamesCount = 0;
+                let pastGamesCount = 0;
+
+                for (const item of dataTable) {
+                    if (item.status === "DELETED") continue;
+
+                    const row = document.createElement("tr");
+
+                    // Check if it is a current or past game
+                    if (item.win || item.status === "DENYED") {
+                        pastGamesCount++;
+                        const table = pastGameTable;
+
+                        if (item.status === "DENYED") {
+                            if (item.ownerId == userId) {
+                                row.innerHTML = `
+                                    <td>${item.ownerName}</td>
+                                    <td><span style="color: #6c757d;">Game Ended</span></td>
+                                    <td>${item.time}</td>
+                                    <td>
+                                        <button class="table-btn btn-delete" onclick="sendAction(3, ${item.gameId})">Delete</button>
+                                    </td>`;
+                            } else {
+                                row.innerHTML = `
+                                    <td>${item.ownerName}</td>
+                                    <td><span style="color: #dc3545;">Declined</span></td>
+                                    <td>${item.time}</td>
+                                    <td><span style="color: #6c757d;">Game Ended</span></td>
+                                `;
+                            }
+                        } else {
+                            let winnerName;
+                            let winnerClass;
+                            if (item.win == true && item.winner == 0) {
+                              winnerName = "Tie";
+                              winnerClass = "winner-tie";
+
+                            } else if ((item.winner == item.ownerShape) === (item.ownerId == userId)) {
+                                winnerName = "You";
+                                winnerClass = "winner-you";
+                            } else {
+                                if (item.winner == item.ownerShape) {
+                                    winnerName = item.ownerName;
+                                } else {
+                                    winnerName = item.opponentName;
+                                }
+                                winnerClass = "winner-opponent";
+                            }
+
+                            row.innerHTML = `
+                                <td>${item.ownerName}, ${item.opponentName}</td>
+                                <td><span class="${winnerClass}">🏆 ${winnerName}</span></td>
+                                <td>${item.time}</td>
+                                <td><button class="table-btn btn-view" onclick="location.href='/game/${item.gameId}'">View Game</button></td>
+                            `;
+                        }
+
+                        table.appendChild(row);
+                    } else {
+                        activeGamesCount++;
+                        const table = activeGameTable;
+
+                        let turn, turnClass;
+                        if (item.currentTurn == userId) {
+                            turn = "Your Turn";
+                            turnClass = "status-your-turn";
+                        } else {
+                            turn = "Opponent's Turn";
+                            turnClass = "status-opponent-turn";
+                        }
+
+                        let activeopponentname;
+                        if (item.ownerId == userId) {
+                            activeopponentname = item.opponentName;
+                        } else {
+                            activeopponentname = item.ownerName;
+                        }
+
+                        row.innerHTML = `
+                            <td>${activeopponentname}</td>
+                            <td><span class="status-indicator ${turnClass}">${turn}</span></td>
+                            <td>${item.time}</td>
+                        `;
+
+                        if (item.status === "PENDING") {
+                            if (item.opponentId == userId) {
+                                row.innerHTML += `
+                                    <td>
+                                        <button class="table-btn btn-accept" onclick="sendAction(1, ${item.gameId})">Accept</button>
+                                        <button class="table-btn btn-reject" onclick="sendAction(2, ${item.gameId})">Reject</button>
+                                    </td>`;
+                            } else {
+                                row.innerHTML += `
+                                    <td>
+                                        <button class="table-btn btn-pending" disabled>⏳ Pending...</button>
+                                    </td>`;
+                            }
+                        } else if (item.status === "DENYED") {
+                            row.innerHTML += `
+                                <td>
+                                    <button class="table-btn btn-delete" onclick="sendAction(3, ${item.gameId})">Delete</button>
+                                </td>`;
+                        } else if (item.status === "ACCEPTED") {
+                            row.innerHTML += `
+                                <td>
+                                    <button class="table-btn btn-play" onclick="location.href='/game/${item.gameId}'">🎮 Play</button>
+                                </td>`;
+                        }
+
+                        table.appendChild(row);
+                    }
+                }
+
+                // Show/hide empty state messages
+                activeGamesEmpty.style.display = activeGamesCount === 0 ? 'block' : 'none';
+                pastGamesEmpty.style.display = pastGamesCount === 0 ? 'block' : 'none';
+            }
+        </script>
+    </body>
+</html>
